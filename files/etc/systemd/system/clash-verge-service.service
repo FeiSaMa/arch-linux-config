@@ -1,13 +1,11 @@
 [Unit]
-Description=Clash Verge Service
-After=network-online.target
+Description=Clash Verge Service helps to launch Clash Core.
+After=network-online.target nftables.service iptables.service
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/clash-verge-service
-# 注：新机器上如需指定运行用户，取消注释并替换为实际用户名：
-# User=YOUR_USERNAME
-# Group=YOUR_USERNAME
+Group=feisama
 Restart=always
 RestartSec=5
 
