@@ -132,8 +132,8 @@ sudo pacman -S --needed fastfetch yazi
 sudo pacman -S --needed flatpak
 sudo pacman -S --needed exfat-utils
 
-# 启用 multilib 仓库（lib32 包需要）
-sudo sed -i '/\[multilib\]/,/Include/s/^#//' /etc/pacman.conf
+# 启用 multilib 仓库（lib32 包需要，若已启用则跳过）
+grep -q '^\[multilib\]' /etc/pacman.conf || echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' | sudo tee -a /etc/pacman.conf
 sudo pacman -Sy
 
 # 图形驱动 (Intel)
@@ -189,8 +189,13 @@ sudo flatpak install -y flathub \
 ### 验证
 
 ```bash
-pacman -Q --explicit | wc -l     # 应接近 75（因依赖版本可能有差异）
-yay -Q --aur | wc -l             # 应 ≈ 8 (含 rime-ice-git)
+pacman -Q --explicit | wc -l     # 应接近 80-95（因依赖和 GNOME 版本差异）
+# AUR 包逐个验证：
+for pkg in clash-verge-rev-bin visual-studio-code-bin opencode-bin \
+  moekoemusic-bin wechat-bin thinkfan catppuccin-gtk-theme-macchiato \
+  rime-ice-git; do
+  pacman -Q "$pkg" &>/dev/null && echo "  ✅ $pkg" || echo "  ❌ $pkg"
+done
 flatpak list --system | wc -l    # 应 ≈ 7
 ```
 
@@ -499,13 +504,13 @@ fi
 ```
 
 ```bash
-# 设置 GRUB 内核参数（mitigations=off 等）
-# 追加参数到 GRUB_CMDLINE_LINUX_DEFAULT（若变量不存在则创建）
-if grep -q '^GRUB_CMDLINE_LINUX_DEFAULT' /etc/default/grub; then
-  sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& mitigations=off zswap.enabled=0 nmi_watchdog=0/' /etc/default/grub
-else
-  echo 'GRUB_CMDLINE_LINUX_DEFAULT="mitigations=off zswap.enabled=0 nmi_watchdog=0"' | sudo tee -a /etc/default/grub
-fi
+# 设置 GRUB 内核参数（仅添加不存在的参数，避免重复）
+CURRENT=$(grep -oP '^GRUB_CMDLINE_LINUX_DEFAULT="\K[^"]*' /etc/default/grub 2>/dev/null)
+for param in mitigations=off zswap.enabled=0 nmi_watchdog=0; do
+  echo "$CURRENT" | grep -qw "$param" || CURRENT="$CURRENT $param"
+done
+sudo sed -i "s/^GRUB_CMDLINE_LINUX_DEFAULT=\".*\"/GRUB_CMDLINE_LINUX_DEFAULT=\"$CURRENT\"/" /etc/default/grub 2>/dev/null \
+  || echo "GRUB_CMDLINE_LINUX_DEFAULT=\"$CURRENT\"" | sudo tee -a /etc/default/grub
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 

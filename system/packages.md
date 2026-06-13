@@ -1,6 +1,6 @@
 # 软件包变化
 
-## 官方仓库显式安装（75 个）
+## 官方仓库显式安装（分组列表，实际数量 80-95 视依赖版本而定）
 
 ```
 # Core/系统
@@ -98,8 +98,8 @@ sudo pacman -S --needed fastfetch yazi
 sudo pacman -S --needed flatpak
 sudo pacman -S --needed exfat-utils
 
-# 启用 multilib 仓库
-sudo sed -i '/\[multilib\]/,/Include/s/^#//' /etc/pacman.conf
+# 启用 multilib 仓库（若已启用则跳过，幂等）
+grep -q '^\[multilib\]' /etc/pacman.conf || echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' | sudo tee -a /etc/pacman.conf
 sudo pacman -Sy
 
 # 图形驱动
