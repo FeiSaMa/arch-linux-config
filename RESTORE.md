@@ -2,12 +2,15 @@
 
 > 在刚装好的 Arch Linux 上通过 opencode 一键恢复系统。
 >
-> **前提：** Arch base 已安装、已联网、已有普通用户、Btrfs + snapper + GRUB 就绪
+> **前提：** 已按 [Shorin ArchLinux 安装指南](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) 完成系统安装，创建 snapper #23 快照 "before desktop"
 >
 > **起始状态：** snapper #23 "before desktop" 快照点
 > - ✅ Arch base + 网络 + pacman
-> - ✅ Btrfs 子卷 + snapper + GRUB
+> - ✅ Btrfs 子卷（@, @home）+ snapper + GRUB（ESP 在 /efi）
+> - ✅ NetworkManager + zram-generator + locale/时区/主机名/普通用户
 > - ❌ 无桌面环境（Phase 4 需登录 GNOME 后执行）
+>
+> **注意：** 指南中已配置的项（GRUB、zram、locale 等）会被本流程安全覆盖/合并。`pacman -S --needed` 保证不会重复安装。
 >
 > **注意：** 本配置针对 ThinkPad T14 Gen 7 (Intel Core Ultra 7 356H)。如果目标机器硬件不同，\n\
 > Phase 5（硬件调优）中的 thinkfan、RAPL 功率限制、GPU min_freq 等参数需要重新适配。
