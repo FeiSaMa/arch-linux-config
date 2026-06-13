@@ -63,9 +63,12 @@ mkdir -p ~/.config/ghostty ~/.config/fcitx5 ~/.config/gtk-3.0 ~/.config/autostar
 # AI 读取 home/.config/ghostty/config → tee ~/.config/ghostty/config
 # ...
 
+# Oh My Zsh（.zshrc 依赖此框架）
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+
 # Neovim
 git clone https://github.com/LazyVim/starter ~/.config/nvim
 
 # 切换 shell
-chsh -s /usr/bin/zsh
+sudo chsh -s /usr/bin/zsh "$USER"
 ```

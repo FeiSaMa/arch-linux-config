@@ -131,7 +131,8 @@ sudo pacman -S --needed stress-ng intel-undervolt
 ```bash
 yay -S --needed clash-verge-rev-bin
 yay -S --needed visual-studio-code-bin
-yay -S --needed opencode-bin
+# opencode-bin 已在 bootstrap 中安装（首次安装需要），此处可跳过
+# yay -S --needed opencode-bin
 yay -S --needed moekoemusic-bin
 yay -S --needed wechat-bin
 yay -S --needed thinkfan

@@ -79,7 +79,13 @@ ls ~/.config/opencode/opencode.jsonc ~/.config/opencode/instructions/system.md
 # Core/系统
 sudo pacman -S --needed base grub efibootmgr os-prober
 sudo pacman -S --needed networkmanager dhcpcd
-sudo pacman -S --needed snapper grub-btrfs snap-pac btrfs-assistant btrfs-progs
+# 注：snapper/grub-btrfs/snap-pac 需要 Btrfs 文件系统，非 Btrfs 环境跳过
+sudo pacman -S --needed btrfs-progs
+if mount | grep -q 'on / type btrfs'; then
+  sudo pacman -S --needed snapper grub-btrfs snap-pac btrfs-assistant
+else
+  echo "非 Btrfs 根文件系统，跳过 snapper/grub-btrfs"
+fi
 sudo pacman -S --needed pacman-contrib
 sudo pacman -S --needed power-profiles-daemon
 sudo pacman -S --needed pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber
@@ -140,7 +146,7 @@ sudo pacman -S --needed stress-ng intel-undervolt
 ```bash
 yay -S --needed clash-verge-rev-bin
 yay -S --needed visual-studio-code-bin
-yay -S --needed opencode-bin
+# opencode-bin 已在 bootstrap 中安装，此处不重复
 yay -S --needed moekoemusic-bin
 yay -S --needed wechat-bin
 yay -S --needed thinkfan
@@ -208,8 +214,10 @@ AI 从 `files/etc/adjtime` 读取内容并写入 `/etc/adjtime`
 （注：adjtime 含旧机器的时间戳，AI 也可选择不复制，改用 `hwclock --systohc --utc` 生成新值）
 
 ```bash
-# 生成 locale（如果尚未生成）
-sudo sed -i 's/#zh_CN.UTF-8/zh_CN.UTF-8/' /etc/locale.gen 2>/dev/null || true
+# 生成 locale（zh_CN.UTF-8 需在 /etc/locale.gen 中启用）
+if ! grep -q '^zh_CN.UTF-8' /etc/locale.gen; then
+  sudo sed -i 's/#zh_CN.UTF-8/zh_CN.UTF-8/' /etc/locale.gen 2>/dev/null || echo 'zh_CN.UTF-8 UTF-8' | sudo tee -a /etc/locale.gen
+fi
 sudo locale-gen
 
 # 区域设置
@@ -219,9 +227,17 @@ sudo timedatectl set-timezone Asia/Shanghai
 sudo timedatectl set-ntp true
 sudo hwclock --systohc --utc
 
-# GRUB 引导（假设 ESP 分区已挂载到 /efi）
-# 注：实际分区 UUID 需根据新机器的 /etc/fstab 调整
-sudo grub-install --target=x86_64-efi --efi-directory=/efi
+# GRUB 引导（检测 UEFI 或 BIOS）
+if [ -d /sys/firmware/efi ]; then
+  echo "检测到 UEFI 模式"
+  # 查找 ESP 挂载点
+  EFI_DIR=$(mount | grep 'vfat.*/boot\|vfat.*/efi' | awk '{print $3}' | head -1)
+  [ -z "$EFI_DIR" ] && EFI_DIR="/efi"
+  sudo grub-install --target=x86_64-efi --efi-directory="$EFI_DIR"
+else
+  echo "检测到 BIOS/Legacy 模式"
+  sudo grub-install --target=i386-pc
+fi
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 # initramfs（thinkpad_acpi 风扇控制）
@@ -242,6 +258,7 @@ cat /proc/sys/vm/swappiness  # → 1
 - GRUB 安装需确认 EFI 分区路径（可能是 `/boot` 或 `/efi`）
 - `mkinitcpio -P` 失败：检查 `/etc/mkinitcpio.conf` 是否存在
 - `hwclock` 失败：跳过，不影响系统功能
+- **建议此时重启一次**，确保 GRUB 参数和 initramfs 生效后再继续 Phase 3-7
 
 ---
 
@@ -265,12 +282,15 @@ AI 从 `home/.zshrc` 读取内容并写入 `~/.zshrc`
 AI 从 `home/.p10k.zsh` 读取内容并写入 `~/.p10k.zsh`
 AI 从 `home/.config/ghostty/config` 读取内容并写入 `~/.config/ghostty/config`
 AI 从 `home/.config/fcitx5/config` 读取内容并写入 `~/.config/fcitx5/config`
-AI 从 `home/.config/gtk-3.0/settings.ini` 读取内容并写入 `~/.config/gtk-3.0/settings.ini`
-AI 从 `home/.config/mimeapps.list` 读取内容并写入 `~/.config/mimeapps.list`
-AI 从 `home/.config/autostart/Clash Verge.desktop` 读取内容并写入 `~/.config/autostart/Clash Verge.desktop`
-AI 从 `home/.local/share/fcitx5/rime/default.custom.yaml` 读取内容并写入 `~/.local/share/fcitx5/rime/default.custom.yaml`
+AI 从 `home/.config/gtk-3.0/settings.ini` 写入 `~/.config/gtk-3.0/settings.ini`
+AI 从 `home/.config/mimeapps.list` 写入 `~/.config/mimeapps.list`
+AI 从 `home/.config/autostart/"Clash Verge.desktop"` 写入 `~/.config/autostart/"Clash Verge.desktop"`
+AI 从 `home/.local/share/fcitx5/rime/default.custom.yaml` 写入 `~/.local/share/fcitx5/rime/default.custom.yaml`
 
 ```bash
+# Oh My Zsh（.zshrc 依赖此框架）
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+
 # Neovim (LazyVim starter)
 git clone https://github.com/LazyVim/starter ~/.config/nvim
 
@@ -304,7 +324,10 @@ echo $SHELL  # → /usr/bin/zsh
 # 恢复 dconf 设置（含快捷键、主题、扩展配置等所有 GNOME 设置）
 # 注：dconf load 需要 GNOME 会话环境，如果在 TTY 下执行会失败
 # 可暂缓此步，登录 GNOME 后再运行
-dconf load / < ~/refs/arch-linux-config/gnome/dconf.conf 2>/dev/null || echo "dconf 未执行（无 GNOME 会话），登录后再运行"
+#
+# 替换 dconf 中硬编码的旧用户名 /home/feisama/ → /home/$USER/
+sed "s|/home/feisama/|/home/$USER/|g" ~/refs/arch-linux-config/gnome/dconf.conf | \
+  dconf load / 2>/dev/null || echo "dconf 未执行（无 GNOME 会话），登录后再运行 dconf load"
 
 # 安装 GNOME Shell 扩展
 bash ~/refs/arch-linux-config/gnome/extensions.sh
@@ -324,9 +347,14 @@ gsettings set org.gnome.desktop.screensaver picture-uri \
 ### 验证
 
 ```bash
-gsettings get org.gnome.desktop.interface.color-scheme  # → 'prefer-dark'
-gsettings get org.gnome.desktop.interface.accent-color   # → 'purple'
-gnome-extensions list --enabled | wc -l                   # → ≈ 17
+# 以下命令需要 GNOME 会话，在 TTY 下跳过
+if pgrep -x gnome-shell >/dev/null 2>&1; then
+  gsettings get org.gnome.desktop.interface.color-scheme  # → 'prefer-dark'
+  gsettings get org.gnome.desktop.interface.accent-color   # → 'purple'
+  gnome-extensions list --enabled | wc -l                   # → ≈ 17
+else
+  echo "GNOME 未运行，登录后手动验证"
+fi
 ```
 
 ### 失败处理
@@ -346,38 +374,50 @@ gnome-extensions list --enabled | wc -l                   # → ≈ 17
 ### AI 执行
 
 ```bash
-# 部署 PPD 功率调优脚本
-sudo cp ~/refs/arch-linux-config/files/usr/local/bin/ppd-power-tune.sh \
-  /usr/local/bin/
-sudo chmod +x /usr/local/bin/ppd-power-tune.sh
+# 部署 PPD 功率调优脚本（Intel CPU + ThinkPad 专用，其他硬件跳过）
+if [ -d /sys/class/powercap/intel-rapl ]; then
+  sudo cp ~/refs/arch-linux-config/files/usr/local/bin/ppd-power-tune.sh \
+    /usr/local/bin/
+  sudo chmod +x /usr/local/bin/ppd-power-tune.sh
 
-# 设置 CAFFEINE_USER 环境变量（Caffeine 联动需要）
-# 替换为实际用户名
-# sudo sh -c 'echo "CAFFEINE_USER=$(whoami)" > /etc/ppd-power-tune.conf'
+  # 设置 CAFFEINE_USER 供 Caffeine 联动使用（注入到 service 环境）
+  sudo mkdir -p /etc/systemd/system/ppd-profile-monitor.service.d
+  echo "[Service]" | sudo tee /etc/systemd/system/ppd-profile-monitor.service.d/caffeine-user.conf
+  echo "Environment=CAFFEINE_USER=$USER" | sudo tee -a /etc/systemd/system/ppd-profile-monitor.service.d/caffeine-user.conf
 
-# 复制 systemd 服务文件（由 AI 从 files/etc/ 读取写入）
-# 已包含：thinkfan.conf, modprobe.d/99-thinkfan.conf, thinkfan 配置
+  # 重载 systemd
+  sudo systemctl daemon-reload
 
-# 重载 systemd
-sudo systemctl daemon-reload
+  # 启动 ppd-monitor 服务
+  sudo systemctl start ppd-profile-monitor.service 2>/dev/null || echo "服务文件未就绪，Phase 6 将处理"
+else
+  echo "非 Intel RAPL 硬件，跳过 PPD 功率调优"
+fi
 
-# 重载 thinkpad_acpi 模块使 fan_control=1 在当前会话生效
-# （initramfs 重建后重启才能自动生效，当前会话需手动重载）
-sudo modprobe -r thinkpad_acpi 2>/dev/null || true
-sudo modprobe thinkpad_acpi
+# ThinkPad 风扇控制（非 ThinkPad 跳过）
+if [ -d /sys/class/hwmon ] && grep -l ^thinkpad /sys/class/hwmon/hwmon*/name &>/dev/null; then
+  # 重载 thinkpad_acpi 模块使 fan_control=1 在当前会话生效
+  sudo modprobe -r thinkpad_acpi 2>/dev/null || true
+  sudo modprobe thinkpad_acpi
 
-# 启动服务
-sudo systemctl start thinkfan
-sudo systemctl start ppd-profile-monitor.service
+  # 启动 thinkfan
+  sudo systemctl start thinkfan 2>/dev/null || echo "thinkfan 未就绪，Phase 6 将处理"
 
-# 确认 fan_control 生效
-cat /sys/module/thinkpad_acpi/parameters/fan_control  # 应为 Y
+  # 确认 fan_control 生效
+  cat /sys/module/thinkpad_acpi/parameters/fan_control  # 应为 Y
+else
+  echo "非 ThinkPad 硬件，跳过 thinkfan"
+fi
 ```
 
 ```bash
 # 设置 GRUB 内核参数（mitigations=off 等）
-# 追加参数到 GRUB_CMDLINE_LINUX_DEFAULT
-sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& mitigations=off zswap.enabled=0 nmi_watchdog=0/' /etc/default/grub
+# 追加参数到 GRUB_CMDLINE_LINUX_DEFAULT（若变量不存在则创建）
+if grep -q '^GRUB_CMDLINE_LINUX_DEFAULT' /etc/default/grub; then
+  sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& mitigations=off zswap.enabled=0 nmi_watchdog=0/' /etc/default/grub
+else
+  echo 'GRUB_CMDLINE_LINUX_DEFAULT="mitigations=off zswap.enabled=0 nmi_watchdog=0"' | sudo tee -a /etc/default/grub
+fi
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
@@ -417,8 +457,7 @@ sudo systemctl enable grub-btrfsd.service
 sudo systemctl enable ppd-profile-monitor.service
 sudo systemctl enable clash-verge-service.service
 
-# 用户服务（需以普通用户身份执行，非 sudo）
-# 如果当前是 root，先切换到用户 su - $USER
+# 用户服务（AI 已以普通用户身份运行，直接执行即可）
 systemctl --user enable pipewire.service
 systemctl --user enable pipewire-pulse.service
 systemctl --user enable wireplumber.service

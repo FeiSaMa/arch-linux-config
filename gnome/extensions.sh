@@ -6,6 +6,14 @@
 set -uo pipefail
 
 echo "=== 安装 GNOME Shell 扩展 ==="
+echo "注：需要 GNOME Shell 正在运行。如果在 TTY 下执行，扩展安装将暂缓。"
+echo ""
+
+# 检测 GNOME Shell 是否运行
+if ! pgrep -x gnome-shell >/dev/null 2>&1; then
+  echo "⚠️  GNOME Shell 未运行，跳过扩展安装。登录后再运行此脚本。"
+  exit 0
+fi
 
 # 通过 GNOME Extensions CLI 安装 (需要 gnome-browser-connector 或 Extension Manager)
 # 备用：从 GitHub Releases 下载 .shell-extension.zip
