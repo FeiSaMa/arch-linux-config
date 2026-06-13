@@ -34,6 +34,7 @@ ufw status verbose
 #   - 桌面 autostart：Clash Verge.desktop
 #   - 代理 PAC 地址：http://127.0.0.1:33331/commands/pac
 #   - GNOME 代理模式：none（当前未启用）
+#   - 配置备份：network/clash/（含 profiles.yaml、verge.yaml、规则文件等）
 ```
 
 ## 网络连接

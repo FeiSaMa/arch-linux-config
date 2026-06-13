@@ -23,6 +23,10 @@ sudo pacman -Sy archlinuxcn-keyring yay git base-devel
 # 2. 安装 Clash Verge 代理核心（CLI 守护进程，无需桌面）
 #    archlinuxcn 有预编译包，无需翻墙
 yay -S clash-verge-rev-bin
+
+# 2a. 恢复 Clash 配置（仓库已备份，含订阅链接、分组、规则）
+#     opencode 启动后会自动执行，也可以手动复制：
+#     cp ~/refs/arch-linux-config/network/clash/* ~/.local/share/io.github.clash-verge-rev.clash-verge-rev/
 sudo systemctl enable --now clash-verge-service.service
 
 # 3. 设置代理环境变量（clash 默认 HTTP 代理端口 7890）

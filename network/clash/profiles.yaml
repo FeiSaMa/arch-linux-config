@@ -1,0 +1,61 @@
+# Profiles Config for Clash Verge
+
+current: RgC78V9ymQIM
+items:
+- uid: Merge
+  type: merge
+  name: null
+  file: Merge.yaml
+  updated: 1781055127
+- uid: Script
+  type: script
+  name: null
+  file: Script.js
+  updated: 1781055127
+- uid: mI0oHrqOQ7RY
+  type: merge
+  name: null
+  file: mI0oHrqOQ7RY.yaml
+  updated: 1781055156
+- uid: s8veUXWpn3H3
+  type: script
+  name: null
+  file: s8veUXWpn3H3.js
+  updated: 1781055156
+- uid: rRND6zwzYQWz
+  type: rules
+  name: null
+  file: rRND6zwzYQWz.yaml
+  updated: 1781055156
+- uid: pgDkw2gjiXN7
+  type: proxies
+  name: null
+  file: pgDkw2gjiXN7.yaml
+  updated: 1781055156
+- uid: gYEE8b8oJL9J
+  type: groups
+  name: null
+  file: gYEE8b8oJL9J.yaml
+  updated: 1781055156
+- uid: RgC78V9ymQIM
+  type: remote
+  name: iggfeed.yaml
+  file: RgC78V9ymQIM.yaml
+  url: https://feed.iggv5.com/c/714a8058-614e-4068-965a-682d2263d5b2/platform/clash/iGG-iGuge
+  selected:
+  - name: SteamGame
+    now: 🔰 节点选择
+  extra:
+    upload: 0
+    download: 2730000527
+    total: 214748364800
+    expire: 1805627142
+  updated: 1781327931
+  option:
+    update_interval: 1440
+    allow_auto_update: true
+    merge: mI0oHrqOQ7RY
+    script: s8veUXWpn3H3
+    rules: rRND6zwzYQWz
+    proxies: pgDkw2gjiXN7
+    groups: gYEE8b8oJL9J
