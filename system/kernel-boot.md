@@ -20,9 +20,10 @@
 - 分辨率：1920x1200（`GRUB_GFXMODE=1920x1200`）
 - 语言：`GRUB_LANGCODE=en_US`（英文，通过修改 `/etc/grub.d/00_header` 和 `/usr/bin/grub-mkconfig` 使该变量生效）
 - 字体：`GRUB_FONT=/boot/grub/fonts/ter-u32n-32.pf2`
-- 主题：`/boot/grub/themes/CyberGRUB-2077/theme.txt`（自定义赛博朋克主题）
-- 菜单字体：`Noto Sans CJK JP Regular 24`（支持中文显示）
-- 终端字体：`Noto Sans CJK JP Regular 16`
+- 主题：`/boot/grub/themes/CyberGRUB-2077/theme.txt`（[CyberGRUB-2077](https://github.com/adnksharp/CyberGRUB-2077)）
+- 菜单字体：`Rajdhani Regular 24`（上游原值，英文窄体紧凑；中文由 GRUB 自动从 Noto 回退）
+- 终端字体：`Noto Sans CJK JP Regular 16`（支持中文终端显示）
+- 主题文件同时存在于 ESP（`/efi/grub/themes/CyberGRUB-2077/`）和 Btrfs 根分区，修改需同步两份
 - 检测 Windows Boot Manager（`os-prober` 启用）
 - 快照启动支持：`grub-btrfsd` + snapper
 

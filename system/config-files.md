@@ -20,6 +20,7 @@
 | `/etc/adjtime` | `files/etc/adjtime` |
 | `/etc/systemd/system/ppd-profile-monitor.service` | `files/etc/systemd/system/ppd-profile-monitor.service` |
 | `/etc/systemd/system/clash-verge-service.service` | `files/etc/systemd/system/clash-verge-service.service` |
+| `/boot/grub/themes/CyberGRUB-2077/theme.txt` | `files/boot/grub/themes/CyberGRUB-2077/theme.txt` |
 
 ## 额外说明
 
@@ -31,6 +32,14 @@ GRUB_CMDLINE_LINUX_DEFAULT="loglevel=5 zswap.enabled=0 nmi_watchdog=0 mitigation
 ```
 
 注：`rootflags=subvol=@` 已从 `GRUB_CMDLINE_LINUX_DEFAULT` 中移除，由 `grub-mkconfig` 自动从 fstab 追加，避免重复。
+
+### /boot/grub/themes/CyberGRUB-2077/theme.txt
+
+CyberGRUB-2077 主题（[GitHub](https://github.com/adnksharp/CyberGRUB-2077)），一份在 ESP 一份在 Btrfs 根分区，两者保持一致。
+
+- `item_font` 使用 `Rajdhani Regular 24`（上游原值），英文窄体紧凑；中文通过 GRUB 字体回退自动使用 Noto Sans CJK 显示。
+- `terminal-font` 使用 `Noto Sans CJK JP Regular 16` 以支持中文终端显示。
+- 修改任一文件后必须同步更新另一份。
 
 ### /etc/fstab
 
