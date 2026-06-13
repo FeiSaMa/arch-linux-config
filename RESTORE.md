@@ -161,7 +161,7 @@ sudo pacman -S --needed stress-ng intel-undervolt
 **AUR 包：**
 
 ```bash
-# clash-verge-rev-bin 已在 bootstrap 中安装（代理必需）
+# clash-verge-rev-bin 已在 bootstrap 中安装（含 CLI 守护进程，无需桌面）
 yay -S --needed visual-studio-code-bin
 # opencode-bin 已在 bootstrap 中安装，此处不重复
 yay -S --needed moekoemusic-bin
