@@ -1,7 +1,7 @@
 # ThinkPad 性能释放调优记录
 
 > **历史文档：** 本文记录的是最初调优的全过程，包含原始脚本和内嵌的命令。
-> **当前可执行版本见：** `files/usr/local/bin/ppd-power-tune.sh`（含 CAFFEINE_USER 环境变量支持）
+> **当前可执行版本见：** `files/usr/local/bin/ppd-power-tune.sh`
 
 日期: 2026-06-11
 主机: ThinkPad / Arch Linux / Intel Core Ultra 7 356H / 内核 7.0.11-zen
@@ -18,7 +18,7 @@ GNOME 右上角切 PPD 模式，六类参数自动跟随：
 | 🌿 平衡 | 65W | **85W** (↑31%) | 650 MHz | 100 µs | powersave | 15% | 95°C |
 | 🍃 省电 | **20W** (↓69%) | **35W** (↓46%) | 100 MHz | 500 µs | powersupersave | 20% | 52°C |
 
-核心改动：`ppd-power-tune.sh` + `ppd-profile-monitor.service`。切 performance 模式时自动开启 Caffeine 防休眠。
+核心改动：`ppd-power-tune.sh` + `ppd-profile-monitor.service`。
 
 ```bash
 # 部署
@@ -59,8 +59,6 @@ pkexec sh -c '
   echo 100 > /proc/sys/vm/vfs_cache_pressure 2>/dev/null || true
   # 复位 I/O scheduler
   echo kyber > /sys/block/nvme0n1/queue/scheduler 2>/dev/null || true
-  # 关闭 Caffeine
-  systemd-run --user -M feisama@ -P gsettings set org.gnome.shell.extensions.caffeine cli-toggle false 2>/dev/null || true
 '
 ```
 
@@ -708,59 +706,3 @@ cat /sys/block/nvme0n1/queue/scheduler  # → [none]
 
 ---
 
-## 16. 后续维护: 2026-06-13 Caffeine PPD 联动
-
-### 背景
-Caffeine GNOME 扩展在全屏应用或手动启用时阻止系统休眠/锁屏。此时通常需要最高性能（全屏游戏/视频），但 PPD 可能停留在 balanced 或 low-power 模式。
-
-### 方案
-在 `ppd-power-tune.sh` 的 daemon 循环中监测 PPD profile 状态，检测到 `performance` 时自动启用 Caffeine（防休眠），退出 performance 时自动禁用 Caffeine（恢复正常电源管理）。
-
-### 工作流程
-
-```
-PPD performance 切入选定 → 自动开启 Caffeine（防止系统休眠）
-PPD 切出 performance     → 自动关闭 Caffeine（恢复正常电源管理）
-```
-
-### 实现
-
-```bash
-set_caffeine() {
-    local state="$1"
-    local current
-    current=$(systemd-run --user -M feisama@ -P gsettings get org.gnome.shell.extensions.caffeine cli-toggle)
-    if [ "$current" != "$state" ]; then
-        systemd-run --user -M feisama@ -P gsettings set org.gnome.shell.extensions.caffeine cli-toggle "$state"
-    fi
-}
-```
-
-- 通过 `cli-toggle` gsettings 键控制 Caffeine（既是状态镜像，也是触发开关）
-- 使用 `systemd-run --user -M` 以用户身份运行，解决 root daemon 访问用户 D-Bus session 的问题
-- 只检测 profile 变化边沿，避免每轮重复写入
-
-### 前提
-```bash
-# Caffeine gsettings schema 需编译到用户路径
-cp ~/.local/share/gnome-shell/extensions/caffeine@patapon.info/schemas/org.gnome.shell.extensions.caffeine.gschema.xml ~/.local/share/glib-2.0/schemas/
-glib-compile-schemas ~/.local/share/glib-2.0/schemas/
-```
-
-### 验证
-```bash
-# 切到 balanced → Caffeine 自动关闭
-pkexec powerprofilesctl set balanced && sleep 12
-systemd-run --user -M feisama@ -P gsettings get org.gnome.shell.extensions.caffeine cli-toggle
-# 应输出 false
-
-# 切回 performance → Caffeine 自动开启
-pkexec powerprofilesctl set performance && sleep 12
-systemd-run --user -M feisama@ -P gsettings get org.gnome.shell.extensions.caffeine cli-toggle
-# 应输出 true
-
-# 查看日志
-journalctl -u ppd-profile-monitor.service | grep -i caffeine
-# 应出现 "Performance mode ON, enabling Caffeine"
-# 和 "Performance mode OFF, disabling Caffeine"
-```

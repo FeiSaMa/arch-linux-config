@@ -478,11 +478,6 @@ if [ -d /sys/class/powercap/intel-rapl ]; then
     /usr/local/bin/
   sudo chmod +x /usr/local/bin/ppd-power-tune.sh
 
-  # 设置 CAFFEINE_USER 供 Caffeine 联动使用（注入到 service 环境）
-  sudo mkdir -p /etc/systemd/system/ppd-profile-monitor.service.d
-  echo "[Service]" | sudo tee /etc/systemd/system/ppd-profile-monitor.service.d/caffeine-user.conf
-  echo "Environment=CAFFEINE_USER=$USER" | sudo tee -a /etc/systemd/system/ppd-profile-monitor.service.d/caffeine-user.conf
-
   # 重载 systemd
   sudo systemctl daemon-reload
 
@@ -628,8 +623,7 @@ cat /etc/timezone 2>/dev/null || timedatectl show --property Timezone --value
 echo "=== 7. 无 pacnew 残留 ==="
 find /etc -name "*.pacnew" 2>/dev/null
 
-echo "=== 8. Caffeine 联动 ==="
-sudo -u "$USER" GSETTINGS_BACKEND=memory dbus-launch gsettings get org.gnome.shell.extensions.caffeine cli-toggle 2>/dev/null || echo "需登录 GNOME 后验证"
+
 ```
 
 ### 验证通过标准

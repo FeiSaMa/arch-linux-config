@@ -9,10 +9,6 @@ VM_DIRTY="/proc/sys/vm/dirty_ratio"
 VM_DIRTY_BG="/proc/sys/vm/dirty_background_ratio"
 VM_CACHE="/proc/sys/vm/vfs_cache_pressure"
 
-# Caffeine 联动需要知道实际用户名（daemon 以 root 运行，需切换用户访问 GNOME 会话）
-# 新机器上会从 CAFFEINE_USER 环境变量或自动检测获取
-CAFFEINE_USER="${CAFFEINE_USER:-$(logname 2>/dev/null || echo feisama)}"
-
 PKG_DOMAINS=()
 PSYS_DOMAINS=()
 for d in /sys/class/powercap/intel-rapl*/intel-rapl* /sys/class/powercap/intel-rapl-mmio*/intel-rapl-mmio*; do
@@ -87,15 +83,6 @@ set_sched() {
     echo "none" > "$NVME_SCHED" 2>/dev/null || echo "WARNING: failed to set NVMe scheduler" >&2
 }
 
-set_caffeine() {
-    local state="$1"
-    local current
-    current=$(systemd-run --user -M "${CAFFEINE_USER}@" -P gsettings get org.gnome.shell.extensions.caffeine cli-toggle 2>/dev/null || echo "false")
-    if [ "$current" != "$state" ]; then
-        systemd-run --user -M "${CAFFEINE_USER}@" -P gsettings set org.gnome.shell.extensions.caffeine cli-toggle "$state"
-    fi
-}
-
 case "${1:-}" in
     daemon)
         set_sched
@@ -105,13 +92,6 @@ case "${1:-}" in
             sleep 10
             profile=$(cat "$PROFILE" 2>/dev/null || echo "unknown")
             if [ "$profile" = "$last_profile" ]; then continue; fi
-            if [ "$profile" = "performance" ] && [ "$last_profile" != "performance" ]; then
-                echo "Performance mode ON, enabling Caffeine" >&2
-                set_caffeine true
-            elif [ "$profile" != "performance" ] && [ "$last_profile" = "performance" ]; then
-                echo "Performance mode OFF, disabling Caffeine" >&2
-                set_caffeine false
-            fi
             set_limits "$profile"
             last_profile="$profile"
         done

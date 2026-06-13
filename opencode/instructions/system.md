@@ -63,8 +63,7 @@ echo "=== low-power ==="
 # 4. 关键服务
 systemctl is-active thinkfan ppd-profile-monitor.service  # 均应 active
 
-# 5. Caffeine 联动（performance 模式下应自动开启）
-gsettings get org.gnome.shell.extensions.caffeine cli-toggle 2>/dev/null || echo "需 GNOME 会话"
+
 ```
 
 ### 同步到 Git

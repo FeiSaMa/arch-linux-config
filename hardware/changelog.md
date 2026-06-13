@@ -12,7 +12,6 @@
 | 8 | 06-12 | 屏幕亮度+键盘背光联动（已撤销，覆盖手动操作） |
 | 9 | 06-12 | NVMe 延迟 + PCIe ASPM 纳入 PPD 联动 |
 | 10 | 06-13 | VM dirty_ratio + vfs_cache_pressure + I/O scheduler none |
-| 11 | 06-13 | Caffeine PPD 联动（performance 自动防休眠） |
 
 ## 检查清单
 
@@ -53,7 +52,4 @@ cat /sys/block/nvme0n1/queue/scheduler
 ls /etc/pacman.d/hooks/
 find /etc -name "*.pacnew" 2>/dev/null
 
-# Caffeine 联动
-sudo -u "$USER" GSETTINGS_BACKEND=memory dbus-launch gsettings get org.gnome.shell.extensions.caffeine cli-toggle 2>/dev/null || echo "需登录 GNOME 后验证"
-journalctl -u ppd-profile-monitor.service | grep -i caffeine | tail -5
 ```
