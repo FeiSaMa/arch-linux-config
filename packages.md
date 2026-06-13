@@ -1,17 +1,18 @@
 # 软件包变化
 
-## 官方仓库显式安装（77 个）
+## 官方仓库显式安装（75 个）
 
 ```
 # Core/系统
-grub efibootmgr os-prober
+base grub efibootmgr os-prober
 networkmanager dhcpcd
-snapper grub-btrfs snap-pac btrfs-assistant
+snapper grub-btrfs snap-pac btrfs-assistant btrfs-progs
 pacman-contrib
 power-profiles-daemon
 pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber
 ufw
 zram-generator
+linux-firmware
 linux-zen-headers linux-lts-headers
 intel-ucode intel-media-driver sof-firmware alsa-firmware alsa-ucm-conf
 bluez
@@ -31,6 +32,7 @@ nautilus-python
 neovim github-cli
 fastfetch yazi
 flatpak
+exfat-utils
 
 # 图形驱动
 vulkan-intel vulkan-icd-loader vulkan-tools
@@ -43,6 +45,7 @@ adobe-source-han-sans-cn-fonts
 
 # 输入法
 fcitx5 fcitx5-rime fcitx5-gtk fcitx5-qt fcitx5-configtool
+rime-ice-git
 
 # Shell
 zsh zsh-autosuggestions zsh-completions zsh-syntax-highlighting
@@ -56,10 +59,10 @@ archlinuxcn-keyring
 base-devel inotify-tools
 
 # 硬件调优
-thinkfan stress-ng intel-undervolt
+stress-ng intel-undervolt
 ```
 
-## AUR 包（6 个）
+## AUR 包（7 个）
 
 | 包 | 说明 |
 |-----|------|
@@ -67,6 +70,7 @@ thinkfan stress-ng intel-undervolt
 | visual-studio-code-bin | VS Code |
 | opencode-bin | AI CLI 工具 |
 | moekoemusic-bin | 音乐播放器 |
+| wechat-bin | 微信 |
 | thinkfan | ThinkPad 风扇守护进程 |
 | catppuccin-gtk-theme-macchiato | GTK 主题 |
 

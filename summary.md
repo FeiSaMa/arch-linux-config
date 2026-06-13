@@ -10,8 +10,8 @@
 
 | 类别 | 数量 |
 |------|------|
-| 显式安装包（官方） | 77 个 |
-| AUR 包 | 6 个 |
+| 显式安装包（官方） | 75 个 |
+| AUR 包 | 7 个 |
 | Flatpak | 7 个 |
 | 启用的系统服务 | 15 个 |
 | 启用的用户服务 | 8 个 |
@@ -28,7 +28,7 @@
 - **双内核**：linux-zen（默认）+ linux-lts（备用）
 - **Btrfs**：子卷布局 + zstd 压缩 + 快照系统
 - **ZRAM**：30.8G 压缩交换，`vm.swappiness=1`
-- **GRUB**：自定义内核参数（禁用 zswap/nmi_watchdog）
+- **GRUB**：自定义内核参数（禁用 zswap/nmi_watchdog，关闭安全缓解 mitigations=off，Btrfs 子卷 rootflags=subvol=@）
 
 ### 桌面
 - **GNOME 50** 完整桌面环境

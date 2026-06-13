@@ -16,7 +16,7 @@ Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch
 
 ```ini
 GRUB_DEFAULT=saved
-GRUB_CMDLINE_LINUX_DEFAULT="loglevel=5 zswap.enabled=0 nmi_watchdog=0"
+GRUB_CMDLINE_LINUX_DEFAULT="loglevel=5 zswap.enabled=0 nmi_watchdog=0 mitigations=off rootflags=subvol=@"
 ```
 
 ## /etc/fstab
