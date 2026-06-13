@@ -427,7 +427,7 @@ echo $SHELL  # → /usr/bin/zsh
 ```bash
 # 恢复 dconf 设置（含快捷键、主题、扩展配置等所有 GNOME 设置）
 # 替换 dconf 中硬编码的旧用户名 /home/feisama/ → /home/$USER/
-sed "s|/home/feisama/|/home/$USER/|g" ~/refs/arch-linux-config/gnome/dconf.conf | \
+sed "s|/home/feisama/|/home/$USER/|g" ~/refs/arch-linux-config/gnome/settings.dconf | \
   dconf load / 2>/dev/null || echo "部分 dconf 键导入失败（可能是扩展未安装导致的 schema 缺失）"
 
 # 安装 GNOME Shell 扩展
@@ -593,7 +593,7 @@ sudo ufw status verbose              # → Status: active
 
 目标：运行完整检查清单，确认所有参数正确。
 
-参考文档：`hardware/improving-loop.md`
+参考文档：`hardware/changelog.md`
 
 ### AI 执行
 

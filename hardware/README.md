@@ -7,7 +7,7 @@ ThinkPad T14 Gen 7 / Arch Linux / Intel Core Ultra 7 356H 性能调优记录。
 | 文件 | 说明 |
 |------|------|
 | `performance-unlock.md` | **操作手册** — 完整脚本、部署命令、回滚方案、维护指南 |
-| `improving-loop.md` | **变更日志** — 11 轮迭代摘要 + 检查清单 |
+| `changelog.md` | **变更日志** — 11 轮迭代摘要 + 检查清单 |
 | `hardware-specs.md` | 硬件配置清单（CPU/GPU/内存/存储/网络/电池） |
 | `stress-test-report.md` | stress-ng 10 分钟压力测试分析报告 |
 | `stress-test.log` | 压力测试原始采样数据（60 次，每 10s） |

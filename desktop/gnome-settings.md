@@ -6,7 +6,7 @@
 
 | 文件 | 说明 |
 |------|------|
-| `gnome/dconf.conf` | dconf dump / 完整备份（含快捷键、主题、扩展配置等） |
+| `gnome/settings.dconf` | dconf dump / 完整备份（含快捷键、主题、扩展配置等） |
 | `gnome/extensions.sh` | 17 个扩展安装脚本 |
 | `gnome/wallpaper.jpg` | 桌面/锁屏壁纸 |
 
@@ -43,7 +43,7 @@
 
 ```bash
 # 恢复 dconf 设置
-dconf load / < ~/refs/arch-linux-config/gnome/dconf.conf
+dconf load / < ~/refs/arch-linux-config/gnome/settings.dconf
 
 # 安装扩展
 bash ~/refs/arch-linux-config/gnome/extensions.sh
