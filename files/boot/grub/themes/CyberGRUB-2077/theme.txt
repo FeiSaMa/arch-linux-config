@@ -4,7 +4,7 @@
 title-text: ""
 desktop-image: "background.png"
 desktop-color: "#000000"
-terminal-font: "Noto Sans CJK JP Regular 16"
+terminal-font: "Noto Sans CJK SC Regular 16"
 terminal-left: "0"
 terminal-top: "0"
 terminal-width: "100%"
