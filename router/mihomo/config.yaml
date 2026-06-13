@@ -1,0 +1,69 @@
+# mihomo config for T14 Gen1 Router
+port: 7899
+socks-port: 7898
+mixed-port: 7897
+redir-port: 7895
+tproxy-port: 7896
+allow-lan: true
+mode: rule
+log-level: info
+ipv6: true
+external-controller: 0.0.0.0:9097
+secret: router2025
+
+tun:
+  enable: true
+  stack: gvisor
+  auto-route: true
+  auto-detect-interface: true
+  dns-hijack:
+    - any:53
+
+dns:
+  enable: true
+  listen: 0.0.0.0:5353
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver:
+    - 223.5.5.5
+    - 114.114.114.114
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+  fallback: []
+  fake-ip-filter:
+    - '*.lan'
+    - '*.local'
+    - '*.arpa'
+    - time.*.com
+    - ntp.*.com
+    - '*.msftncsi.com'
+    - www.msftconnecttest.com
+
+proxy-providers:
+  iGG:
+    type: http
+    url: "https://feed.iggv5.com/c/714a8058-614e-4068-965a-682d2263d5b2/platform/clash/iGG-iGuge"
+    interval: 1440
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 300
+
+proxy-groups:
+  - name: 🔰 节点选择
+    type: select
+    proxies:
+      - 🚀 自动选择
+      - DIRECT
+    use:
+      - iGG
+  - name: 🚀 自动选择
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 300
+    use:
+      - iGG
+
+rules:
+  - MATCH,🔰 节点选择
