@@ -17,6 +17,20 @@
       "options": {
         "timeout": 600000,
         "chunkTimeout": 30000
+      },
+      "models": {
+        "deepseek-v4-flash": {
+          "cost": {
+            "input": 1,
+            "output": 2
+          }
+        },
+        "deepseek-v4-pro": {
+          "cost": {
+            "input": 4,
+            "output": 16
+          }
+        }
       }
     }
   },
