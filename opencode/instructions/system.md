@@ -30,6 +30,37 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg        # 新机器
 ### 硬件配置参考
 涉及硬件相关修改（如 ThinkPad 电源管理、内核参数、CPU/GPU 调优等），先参考 `~/refs/arch-linux-config/hardware/` 中的已有文档。
 
+### 硬件功能验证
+当需要检查硬件是否运行正常时，除常规检测外还必须验证自定义调优参数是否生效：
+
+```bash
+# 1. 风扇控制
+cat /sys/module/thinkpad_acpi/parameters/fan_control  # 应为 Y
+
+# 2. RAPL 功率墙（MSR + MMIO 双接口需一致）
+grep . /sys/class/powercap/intel-rapl*/intel-rapl:0/constraint_0_power_limit_uw
+grep . /sys/class/powercap/intel-rapl-mmio*/intel-rapl-mmio:0/constraint_0_power_limit_uw
+
+# 3. PPD 联动 — 三档切换验证
+echo "=== performance ==="
+cat /sys/class/drm/card0/device/tile0/gt0/freq0/min_freq  # 应 700
+cat /sys/module/nvme_core/parameters/default_ps_max_latency_us  # 应 0
+cat /sys/module/pcie_aspm/parameters/policy | grep -oP '\[\K[^\]]+'  # 应 performance
+cat /proc/sys/vm/dirty_ratio  # 应 10
+
+echo "=== balanced ==="
+# GT0=650, NVMe=100000, ASPM=powersave, dirty=15
+
+echo "=== low-power ==="
+# GT0=100, NVMe=500000, ASPM=powersupersave, dirty=20
+
+# 4. 关键服务
+systemctl is-active thinkfan ppd-profile-monitor.service  # 均应 active
+
+# 5. Caffeine 联动（performance 模式下应自动开启）
+gsettings get org.gnome.shell.extensions.caffeine cli-toggle 2>/dev/null || echo "需 GNOME 会话"
+```
+
 ### 同步到 Git
 对系统或硬件做出任何更改后，需同步到仓库并推送到 GitHub：
 
