@@ -14,8 +14,15 @@
 - GRUB 2.14
 - UEFI 模式 (`/efi`)
 - GRUB 配置：`/etc/default/grub`
-- 内核命令行：`loglevel=5 zswap.enabled=0 nmi_watchdog=0 rootflags=subvol=@`
+- 内核命令行：`loglevel=5 zswap.enabled=0 nmi_watchdog=0 mitigations=off rootflags=subvol=@`
 - 默认启动项：`saved`（记住上次选择）
+- 超时：5 秒（`GRUB_TIMEOUT=5`）
+- 分辨率：1920x1200（`GRUB_GFXMODE=1920x1200`）
+- 主题：`/usr/share/grub/themes/catppuccin-macchiato-grub-theme/theme.txt`
+- 主题字体：JetBrains Mono Regular 20（由 `grub-mkfont` 从 `JetBrainsMono-Regular.ttf` 生成）
+- GRUB 终端字体与菜单字体：`jetbrains-mono-20.pf2`
+- 检测 Windows Boot Manager（`os-prober` 启用）
+- 快照启动支持：`grub-btrfsd` + snapper
 
 ## mkinitcpio
 
