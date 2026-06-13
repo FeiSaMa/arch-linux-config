@@ -98,8 +98,9 @@ sudo pacman -S --needed fastfetch yazi
 sudo pacman -S --needed flatpak
 sudo pacman -S --needed exfat-utils
 
-# 注：lib32 包需要 multilib 仓库已启用（pacman.conf 中取消注释 [multilib]）
-# 如果尚未启用，先执行 sudo sed -i '/\[multilib\]/,/Include/s/^#//' /etc/pacman.conf
+# 启用 multilib 仓库
+sudo sed -i '/\[multilib\]/,/Include/s/^#//' /etc/pacman.conf
+sudo pacman -Sy
 
 # 图形驱动
 sudo pacman -S --needed vulkan-intel vulkan-icd-loader vulkan-tools

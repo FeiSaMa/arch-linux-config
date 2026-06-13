@@ -2,7 +2,12 @@
 
 > 在刚装好的 Arch Linux 上通过 opencode 一键恢复系统。
 >
-> **前提：** Arch base 已安装、已联网、已有普通用户、已安装 `git` + `yay` + `opencode-bin`
+> **前提：** Arch base 已安装、已联网、已有普通用户、Btrfs + snapper + GRUB 就绪
+>
+> **起始状态：** snapper #23 "before desktop" 快照点
+> - ✅ Arch base + 网络 + pacman
+> - ✅ Btrfs 子卷 + snapper + GRUB
+> - ❌ 无桌面环境（Phase 4 需登录 GNOME 后执行）
 >
 > **注意：** 本配置针对 ThinkPad T14 Gen 7 (Intel Core Ultra 7 356H)。如果目标机器硬件不同，\n\
 > Phase 5（硬件调优）中的 thinkfan、RAPL 功率限制、GPU min_freq 等参数需要重新适配。
@@ -113,8 +118,9 @@ sudo pacman -S --needed fastfetch yazi
 sudo pacman -S --needed flatpak
 sudo pacman -S --needed exfat-utils
 
-# 注：lib32 包需要 multilib 仓库已启用
-# 如果尚未启用，先恢复 pacman.conf（见 Phase 2）或手动取消注释 /etc/pacman.conf 中的 [multilib]
+# 启用 multilib 仓库（lib32 包需要）
+sudo sed -i '/\[multilib\]/,/Include/s/^#//' /etc/pacman.conf
+sudo pacman -Sy
 
 # 图形驱动 (Intel)
 sudo pacman -S --needed vulkan-intel vulkan-icd-loader vulkan-tools
@@ -258,10 +264,9 @@ cat /proc/sys/vm/swappiness  # → 1
 
 ### 失败处理
 
-- GRUB 安装需确认 EFI 分区路径（可能是 `/boot` 或 `/efi`）
+- GRUB 已安装时 `grub-install` 会安全覆盖，不会损坏现有引导
 - `mkinitcpio -P` 失败：检查 `/etc/mkinitcpio.conf` 是否存在
 - `hwclock` 失败：跳过，不影响系统功能
-- **建议此时重启一次**，确保 GRUB 参数和 initramfs 生效后再继续 Phase 3-7
 
 ---
 
@@ -391,18 +396,23 @@ echo $SHELL  # → /usr/bin/zsh
 
 目标：恢复 GNOME 桌面设置、扩展、壁纸。
 
+**时机：** 此阶段需要 GNOME 会话环境。如果当前在 TTY 中（snap #23 场景），请跳过本阶段，完成 Phase 5-6 后重启登录 GNOME，再回来执行。
+
 参考文档：`desktop/gnome-settings.md`
 
 ### AI 执行
 
 ```bash
+# 检测 GNOME 是否正在运行
+if ! pgrep -x gnome-shell >/dev/null 2>&1; then
+  echo "GNOME 未运行，跳过 Phase 4。请完成 Phase 5-6 → reboot → 登录 GNOME 后再运行。"
+  exit 0
+fi
+
 # 恢复 dconf 设置（含快捷键、主题、扩展配置等所有 GNOME 设置）
-# 注：dconf load 需要 GNOME 会话环境，如果在 TTY 下执行会失败
-# 可暂缓此步，登录 GNOME 后再运行
-#
 # 替换 dconf 中硬编码的旧用户名 /home/feisama/ → /home/$USER/
 sed "s|/home/feisama/|/home/$USER/|g" ~/refs/arch-linux-config/gnome/dconf.conf | \
-  dconf load / 2>/dev/null || echo "dconf 未执行（无 GNOME 会话），登录后再运行 dconf load"
+  dconf load / 2>/dev/null || echo "部分 dconf 键导入失败（可能是扩展未安装导致的 schema 缺失）"
 
 # 安装 GNOME Shell 扩展
 bash ~/refs/arch-linux-config/gnome/extensions.sh
@@ -422,14 +432,9 @@ gsettings set org.gnome.desktop.screensaver picture-uri \
 ### 验证
 
 ```bash
-# 以下命令需要 GNOME 会话，在 TTY 下跳过
-if pgrep -x gnome-shell >/dev/null 2>&1; then
-  gsettings get org.gnome.desktop.interface.color-scheme  # → 'prefer-dark'
-  gsettings get org.gnome.desktop.interface.accent-color   # → 'purple'
-  gnome-extensions list --enabled | wc -l                   # → ≈ 17
-else
-  echo "GNOME 未运行，登录后手动验证"
-fi
+gsettings get org.gnome.desktop.interface.color-scheme  # → 'prefer-dark'
+gsettings get org.gnome.desktop.interface.accent-color   # → 'purple'
+gnome-extensions list --enabled | wc -l                   # → ≈ 17
 ```
 
 ### 失败处理
@@ -633,12 +638,24 @@ sudo -u "$USER" GSETTINGS_BACKEND=memory dbus-launch gsettings get org.gnome.she
 
 ## 恢复后的收尾
 
+### 重启进入 GNOME
+
 ```bash
-# 重启进入 GNOME
 sudo reboot
 ```
 
-登录后验证：
+### 登录后完成 Phase 4（GNOME 恢复）
+
+如果 Phase 4 在 TTY 中被跳过（snap #23 场景），登录 GNOME 后：
+
+```bash
+# 重新启动 opencode，告诉他：
+# "继续完成 ~/refs/arch-linux-config/RESTORE.md 中的 Phase 4"
+opencode
+```
+
+### 验证清单
+
 - 切换 PPD 模式检查硬件联动
 - Fcitx5 输入法 (Super+Space)
 - Ghostty 终端 (Catppuccin 主题)
