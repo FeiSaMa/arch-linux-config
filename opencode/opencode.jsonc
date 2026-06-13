@@ -1,52 +1,91 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "deepseek/deepseek-chat",
+
+  // ============================================================
+  // DeepSeek 模型策略配置
+  // 根据任务复杂度自动路由到不同模型以达到最大性价比
+  // ============================================================
+
+  // 默认使用 V4-Flash（平衡速度与能力）
+  "model": "deepseek/deepseek-v4-flash",
+
+  // 小模型用于标题生成等轻量任务 - 使用最便宜的 Flash
+  "small_model": "deepseek/deepseek-v4-flash",
+
+  // 默认使用 build agent
+  "default_agent": "build",
+
   "provider": {
     "deepseek": {}
   },
+
   "instructions": ["~/.config/opencode/instructions/system.md"],
+
   "references": {
     "arch-linux-config": {
       "path": "~/refs/arch-linux-config",
       "description": "Arch Linux system configuration docs — use for /etc/ config files, packages, services, dotfiles, and hardware tuning (see hardware/ subdirectory)"
     }
   },
+
   "lsp": true,
+
+  // ============================================================
+  // Agent 体系：5 个专用 Agent 覆盖不同复杂度场景
+  // ============================================================
   "agent": {
+    // ---- 主要 Agent ----
     "build": {
-      "mode": "primary",
-      "model": "deepseek/deepseek-chat",
-      "description": "Default agent for general development tasks (uses V3 for speed)",
-      "options": {
-        "temperature": 0.3
+      "mode": "all",
+      "model": "deepseek/deepseek-v4-pro",
+      "description": "默认开发 Agent，用于复杂代码编写、架构设计、重构等需要深度推理的任务",
+      "color": "#4FC3F7",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
       }
     },
     "plan": {
-      "mode": "primary",
-      "model": "deepseek/deepseek-reasoner",
-      "description": "Use for complex reasoning, architecture planning, and hard problems (uses R1)",
-      "options": {
-        "temperature": 0.5
+      "mode": "all",
+      "model": "deepseek/deepseek-v4-flash",
+      "description": "规划和代码审查 Agent，用 Flash 做快速分析和方案设计，只读模式",
+      "color": "#81C784",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      }
+    },
+
+    // ---- 全部改为 all，Tab 循环切换 + @ 都能用 ----
+    "code": {
+      "mode": "all",
+      "model": "deepseek/deepseek-v4-flash",
+      "color": "#FFB74D",
+      "temperature": 0.2,
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
       }
     },
     "quick": {
-      "model": "deepseek/deepseek-chat",
-      "options": {
-        "temperature": 0.3,
-        "limit": {
-          "context": 32768,
-          "output": 4096
-        }
+      "description": "极速轻量助手 - 处理文件查找、简单问答、格式化等简单任务，使用 V4-Flash 非思考模式",
+      "mode": "all",
+      "model": "deepseek/deepseek-v4-flash",
+      "color": "#A1887F",
+      "temperature": 0.1,
+      "steps": 5,
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
       }
     },
-    "full": {
-      "model": "deepseek/deepseek-reasoner",
-      "options": {
-        "temperature": 0.7,
-        "limit": {
-          "context": 1048576,
-          "output": 8192
-        }
+    "explore": {
+      "mode": "all",
+      "model": "deepseek/deepseek-v4-flash",
+      "temperature": 0.1,
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
       }
     }
   }
