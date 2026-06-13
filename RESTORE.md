@@ -195,23 +195,26 @@ flatpak list --system | wc -l    # 应 ≈ 7
 sudo mkdir -p /etc/sysctl.d /etc/modprobe.d /etc/NetworkManager/conf.d \
   /etc/pacman.d/hooks /efi
 
-# 复制配置文件（AI 逐个读取 ~/refs/arch-linux-config/files/etc/ 下的文件并写入）
-# 以下是 AI 需要复制到对应路径的文件清单：
+# 系统配置文件恢复原则：
+# - 纯参数文件（sysctl、modprobe、NetworkManager、zram-generator、thinkfan）→ 直接写入
+# - 含旧路径/机器信息的（adjtime）→ 理解后适配
+# - 包管理的（pacman.conf、hooks）→ 校验后写入
+#
+# AI 逐个读取 files/etc/ 下的参考文件，理解后写入对应路径：
 ```
 
-AI 从 `files/etc/environment` 读取内容并写入 `/etc/environment`
-AI 从 `files/etc/sysctl.d/99-swappiness.conf` 读取内容并写入 `/etc/sysctl.d/99-swappiness.conf`
-AI 从 `files/etc/systemd/zram-generator.conf` 读取内容并写入 `/etc/systemd/zram-generator.conf`
-AI 从 `files/etc/modprobe.d/99-thinkfan.conf` 读取内容并写入 `/etc/modprobe.d/99-thinkfan.conf`
-AI 从 `files/etc/NetworkManager/conf.d/20-connectivity.conf` 读取内容并写入 `/etc/NetworkManager/conf.d/20-connectivity.conf`
-AI 从 `files/etc/pacman.d/hooks/merge-journald-conf.hook` 读取内容并写入 `/etc/pacman.d/hooks/merge-journald-conf.hook`
-AI 从 `files/etc/pacman.d/hooks/merge-mkinitcpio-conf.hook` 读取内容并写入 `/etc/pacman.d/hooks/merge-mkinitcpio-conf.hook`
-AI 从 `files/etc/thinkfan.conf` 读取内容并写入 `/etc/thinkfan.conf`
-AI 从 `files/etc/pacman.conf` 读取内容并写入 `/etc/pacman.conf`
-AI 从 `files/etc/locale.conf` 读取内容并写入 `/etc/locale.conf`
-AI 从 `files/etc/hostname` 读取内容并写入 `/etc/hostname`
-AI 从 `files/etc/adjtime` 读取内容并写入 `/etc/adjtime`
-（注：adjtime 含旧机器的时间戳，AI 也可选择不复制，改用 `hwclock --systohc --utc` 生成新值）
+AI 读取 `files/etc/environment` 理解环境变量设置 → 写入 `/etc/environment`
+AI 读取 `files/etc/sysctl.d/99-swappiness.conf` → 写入 `/etc/sysctl.d/99-swappiness.conf`
+AI 读取 `files/etc/systemd/zram-generator.conf` → 写入 `/etc/systemd/zram-generator.conf`
+AI 读取 `files/etc/modprobe.d/99-thinkfan.conf` → 写入 `/etc/modprobe.d/99-thinkfan.conf`
+AI 读取 `files/etc/NetworkManager/conf.d/20-connectivity.conf` → 写入 `/etc/NetworkManager/conf.d/20-connectivity.conf`
+AI 读取 `files/etc/pacman.d/hooks/merge-journald-conf.hook` → 写入 `/etc/pacman.d/hooks/merge-journald-conf.hook`
+AI 读取 `files/etc/pacman.d/hooks/merge-mkinitcpio-conf.hook` → 写入 `/etc/pacman.d/hooks/merge-mkinitcpio-conf.hook`
+AI 读取 `files/etc/thinkfan.conf` → 写入 `/etc/thinkfan.conf`（非 ThinkPad 跳过）
+AI 读取 `files/etc/pacman.conf` → 写入 `/etc/pacman.conf`
+AI 读取 `files/etc/locale.conf` → 写入 `/etc/locale.conf`
+AI 读取 `files/etc/hostname` → 写入 `/etc/hostname`
+AI 读取 `files/etc/adjtime` 了解格式 → 不复制旧时间戳，改用 `hwclock --systohc --utc` 生成
 
 ```bash
 # 生成 locale（zh_CN.UTF-8 需在 /etc/locale.gen 中启用）
@@ -264,13 +267,13 @@ cat /proc/sys/vm/swappiness  # → 1
 
 ## Phase 3: 部署 dotfiles
 
-目标：恢复用户目录下的配置文件。
+目标：在新机器上生成适配的 dotfiles。
+
+**原则：** 不盲目复制旧文件。AI 读取 `home/` 中的参考文件，理解每个配置项的意图，然后为新机器生成适配版本。
 
 参考文档：`desktop/dotfiles.md`
 
-### AI 执行
-
-AI 从 `home/` 目录读取每个文件并写入对应用户路径：
+### AI 理解参考文件
 
 ```bash
 # 创建必要目录
@@ -278,23 +281,95 @@ mkdir -p ~/.config/ghostty ~/.config/fcitx5 ~/.config/gtk-3.0 \
   ~/.config/autostart ~/.local/share/fcitx5/rime
 ```
 
-AI 从 `home/.zshrc` 读取内容并写入 `~/.zshrc`
-AI 从 `home/.p10k.zsh` 读取内容并写入 `~/.p10k.zsh`
-AI 从 `home/.config/ghostty/config` 读取内容并写入 `~/.config/ghostty/config`
-AI 从 `home/.config/fcitx5/config` 读取内容并写入 `~/.config/fcitx5/config`
-AI 从 `home/.config/gtk-3.0/settings.ini` 写入 `~/.config/gtk-3.0/settings.ini`
-AI 从 `home/.config/mimeapps.list` 写入 `~/.config/mimeapps.list`
-AI 从 `home/.config/autostart/"Clash Verge.desktop"` 写入 `~/.config/autostart/"Clash Verge.desktop"`
-AI 从 `home/.local/share/fcitx5/rime/default.custom.yaml` 写入 `~/.local/share/fcitx5/rime/default.custom.yaml`
+**AI 需要为每个 dotfile 做的事情：**
+
+1. 读取参考文件 → 理解配置意图
+2. 检查新机器上对应工具是否已安装
+3. 剔除依赖旧机器特有工具的配置（如 `fan()` 函数需要 ThinkPad hwmon）
+4. 写入适配后的版本
+
+### ~/.zshrc
+
+参考：`home/.zshrc`（148 行，Oh My Zsh + Powerlevel10k）
 
 ```bash
-# Oh My Zsh（.zshrc 依赖此框架）
+# Oh My Zsh 框架（必需，.zshrc 依赖）
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
-# Neovim (LazyVim starter)
-git clone https://github.com/LazyVim/starter ~/.config/nvim
+# Powerlevel10k 主题
+# 已通过 pacman 安装 zsh-theme-powerlevel10k-git
+```
 
-# 切换默认 shell 到 zsh
+**AI 需注意：**
+- `source $ZSH/oh-my-zsh.sh`（第 82 行）依赖 Oh My Zsh，已安装
+- `plugins=(git)`（第 80 行）是 Oh My Zsh 内置插件，无需额外安装
+- `zsh-autosuggestions`（第 138 行）和 `zsh-syntax-highlighting`（第 142 行）从 `/usr/share/` 加载，已通过 pacman 安装
+- `fan()` 函数（第 148 行）是 ThinkPad 专用，非 ThinkPad 机器应移除
+- `p10k.zsh`（第 114 行）已备份，见下方
+
+### ~/.p10k.zsh
+
+参考：`home/.p10k.zsh`（199 行）
+
+```bash
+# 直接写入（纯外观配置，无机器相关路径）
+```
+
+### ~/.config/ghostty/config
+
+参考：`home/.config/ghostty/config`
+
+**AI 需注意：**
+- 主题文件 `catppuccin-macchiato.conf` 来自 ghostty 包内置主题，确认已安装
+- 如 ghostty 未安装，跳过此文件
+
+### ~/.config/fcitx5/config
+
+参考：`home/.config/fcitx5/config`
+
+```bash
+# 直接写入（输入法配置，无机器相关路径）
+```
+
+### ~/.config/gtk-3.0/settings.ini
+
+参考：`home/.config/gtk-3.0/settings.ini`
+
+```bash
+# 直接写入
+```
+
+### ~/.config/mimeapps.list
+
+参考：`home/.config/mimeapps.list`
+
+```bash
+# 直接写入（文件关联配置）
+```
+
+### ~/.config/autostart/Clash Verge.desktop
+
+参考：`home/.config/autostart/"Clash Verge.desktop"`
+
+**AI 需注意：**
+- 文件路径含空格，写入时需用引号
+- 确认 `clash-verge-rev-bin` 已安装（Phase 1 AUR 包）
+
+### Neovim
+
+```bash
+git clone https://github.com/LazyVim/starter ~/.config/nvim
+```
+
+### Rime 输入法
+
+```bash
+# custom.yaml 直接写入（rime-ice-git 包安装后会自动配置词库）
+```
+
+### 切换默认 shell
+
+```bash
 sudo chsh -s /usr/bin/zsh "$USER"
 ```
 

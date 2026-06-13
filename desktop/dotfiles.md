@@ -53,17 +53,20 @@ LazyVim starter 模板：`git clone https://github.com/LazyVim/starter ~/.config
 x-scheme-handler/clash=clash-verge.desktop;
 ```
 
+## AI 恢复原则
+
+**不盲目复制。** AI 读取 `home/` 中的参考文件，理解每个配置项的意图，然后为新机器生成适配版本。
+
+- 纯配置（ghostty、fcitx5、gtk、mimeapps、Rime）→ 直接写入
+- 有工具依赖的（zshrc 需 Oh My Zsh、fan() 需 ThinkPad）→ 理解后适配
+- 有路径依赖的（p10k.zsh 无机器路径）→ 直接写入
+
 ## AI 恢复命令
 
 ```bash
 mkdir -p ~/.config/ghostty ~/.config/fcitx5 ~/.config/gtk-3.0 ~/.config/autostart ~/.local/share/fcitx5/rime
 
-# AI 逐文件读取 home/ 目录并写入对应路径
-# AI 读取 home/.zshrc → tee ~/.zshrc
-# AI 读取 home/.config/ghostty/config → tee ~/.config/ghostty/config
-# ...
-
-# Oh My Zsh（.zshrc 依赖此框架）
+# Oh My Zsh（必需，.zshrc 依赖）
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 # Neovim
