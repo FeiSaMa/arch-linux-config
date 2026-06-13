@@ -10,7 +10,7 @@
 |------|------|------|
 | 1 | 手动安装 Arch Linux（Btrfs + GRUB + 基础配置） | [Shorin ArchLinux → 手动安装](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) |
 | 2 | 创建 snapper #23 快照 "before desktop" | — |
-| 3 | 安装 Clash Verge + 配置代理（国内网络必需） | 见下方 |
+| 3 | 安装 Clash Verge 代理核心 + 配置代理（国内网络必需） | 见下方 |
 | 4 | **从这里开始用 opencode 恢复** | `RESTORE.md` |
 
 ## 快速恢复
@@ -20,7 +20,7 @@
 echo -e "\n[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" | sudo tee -a /etc/pacman.conf
 sudo pacman -Sy archlinuxcn-keyring yay git base-devel
 
-# 2. 安装 Clash Verge + 启动代理（国内网络必需）
+# 2. 安装 Clash Verge 代理核心（CLI 守护进程，无需桌面）
 #    archlinuxcn 有预编译包，无需翻墙
 yay -S clash-verge-rev-bin
 sudo systemctl enable --now clash-verge-service.service

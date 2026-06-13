@@ -22,7 +22,7 @@
 echo -e "\n[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" | sudo tee -a /etc/pacman.conf
 sudo pacman -Sy archlinuxcn-keyring yay git base-devel
 
-# 2. 安装 Clash Verge + 启动代理（国内网络必需）
+# 2. 安装 Clash Verge 代理核心（CLI 守护进程，无需桌面）
 yay -S clash-verge-rev-bin
 sudo systemctl enable --now clash-verge-service.service
 export HTTP_PROXY=http://127.0.0.1:7890
