@@ -56,7 +56,7 @@
 - **ppd-power-tune.sh**：三级 RAPL 功率限制 + GPU 频率 + ASPM 策略
 - **Intel 微码**加载
 - **日志限制 500M** 防膨胀
-- 详细调优记录见 `hardware-tuning/` 目录（16 轮迭代、压力测试、决策链）
+- 详细调优记录见 `hardware/` 目录（11 轮迭代、压力测试）
 
 ### 区域设置
 - `zh_CN.UTF-8` 语言环境
@@ -65,4 +65,4 @@
 
 ---
 
-所有完整文件见本目录下各 `.md` 文件及 `hardware-tuning/` 子目录。
+所有完整文件见本目录下各子目录（`system/`、`desktop/`、`hardware/`、`network/`、`scripts/`）。
