@@ -764,4 +764,3 @@ journalctl -u ppd-profile-monitor.service | grep -i caffeine
 # 应出现 "Performance mode ON, enabling Caffeine"
 # 和 "Performance mode OFF, disabling Caffeine"
 ```
-```
