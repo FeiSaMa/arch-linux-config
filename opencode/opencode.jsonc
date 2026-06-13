@@ -1,0 +1,53 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "deepseek/deepseek-chat",
+  "provider": {
+    "deepseek": {}
+  },
+  "instructions": ["~/.config/opencode/instructions/system.md"],
+  "references": {
+    "arch-linux-config": {
+      "path": "~/refs/arch-linux-config",
+      "description": "Arch Linux system configuration docs — use for /etc/ config files, packages, services, dotfiles, and hardware tuning (see hardware/ subdirectory)"
+    }
+  },
+  "lsp": true,
+  "agent": {
+    "build": {
+      "mode": "primary",
+      "model": "deepseek/deepseek-chat",
+      "description": "Default agent for general development tasks (uses V3 for speed)",
+      "options": {
+        "temperature": 0.3
+      }
+    },
+    "plan": {
+      "mode": "primary",
+      "model": "deepseek/deepseek-reasoner",
+      "description": "Use for complex reasoning, architecture planning, and hard problems (uses R1)",
+      "options": {
+        "temperature": 0.5
+      }
+    },
+    "quick": {
+      "model": "deepseek/deepseek-chat",
+      "options": {
+        "temperature": 0.3,
+        "limit": {
+          "context": 32768,
+          "output": 4096
+        }
+      }
+    },
+    "full": {
+      "model": "deepseek/deepseek-reasoner",
+      "options": {
+        "temperature": 0.7,
+        "limit": {
+          "context": 1048576,
+          "output": 8192
+        }
+      }
+    }
+  }
+}

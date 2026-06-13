@@ -1,0 +1,9 @@
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = systemd
+
+[Action]
+Description = Merging SystemMaxUse=500M into /etc/systemd/journald.conf...
+When = PostTransaction
+Exec = /bin/sh -c 'grep -q "^SystemMaxUse=500M" /etc/systemd/journald.conf || echo "SystemMaxUse=500M" >> /etc/systemd/journald.conf'

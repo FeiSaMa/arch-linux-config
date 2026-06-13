@@ -65,4 +65,6 @@
 
 ---
 
-所有完整文件见本目录下各子目录（`system/`、`desktop/`、`hardware/`、`network/`、`scripts/`）。
+所有完整文件见本目录下各子目录（`system/`、`desktop/`、`hardware/`、`network/`、`scripts/`、`opencode/`、`home/`、`files/`、`gnome/`）。
+
+恢复指南见 `RESTORE.md` — AI 可读的 7 阶段恢复手册。

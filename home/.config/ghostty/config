@@ -1,0 +1,21 @@
+theme = catppuccin-macchiato.conf
+
+#隐藏标题栏
+window-decoration = none
+
+#设置透明度
+background-opacity=0.75
+
+#设置字体和字体大小
+font-family = "Jetbrains Mono" 
+font-size = 13
+
+#设置左右边距
+window-padding-x=10
+#设置上下边距
+window-padding-y=10
+
+#光标样式: block, bar, underline
+cursor-style = block
+#光标闪烁
+cursor-style-blink = true

@@ -1,41 +1,31 @@
 # 自定义脚本与 systemd 服务
 
-## 自定义脚本：/usr/local/bin/ppd-power-tune.sh
+所有脚本和服务文件的实际内容见 `files/` 目录。
 
-根据 `power-profiles-daemon` 的平台 profile 动态设置 RAPL/GPU/NVMe/ASPM 参数。
+## 文件清单
 
-```bash
-# 核心逻辑
-set_limits() {
-    local profile="$1"
-    case "$profile" in
-        performance)
-            pkg_pl1=75000000; pkg_pl2=110000000        # 75W / 110W
-            psys_pl1=80000000; psys_pl2=130000000       # 80W / 130W
-            gt0_min=700; gt1_min=450                     # GPU MHz
-            nvme_lat=0; aspm=performance
-            ;;
-        balanced)
-            pkg_pl1=65000000; pkg_pl2=85000000          # 65W / 85W
-            psys_pl1=70000000; psys_pl2=95000000         # 70W / 95W
-            gt0_min=650; gt1_min=400
-            nvme_lat=100000; aspm=powersave
-            ;;
-        low-power)
-            pkg_pl1=20000000; pkg_pl2=35000000          # 20W / 35W
-            psys_pl1=25000000; psys_pl2=40000000         # 25W / 40W
-            gt0_min=100; gt1_min=100
-            nvme_lat=500000; aspm=powersupersave
-            ;;
-    esac
-    # 写入 RAPL powercap 约束
-    # 设置 GPU min_freq
-    # 设置 NVMe ASPM
-    # 设置 PCIe ASPM 策略
-}
+| 目标路径 | 仓库路径 |
+|----------|---------|
+| `/usr/local/bin/ppd-power-tune.sh` | `files/usr/local/bin/ppd-power-tune.sh` |
+| `/etc/systemd/system/ppd-profile-monitor.service` | 内容见下方 |
+
+## 自定义服务：ppd-profile-monitor.service
+
+```ini
+[Unit]
+Description=PPD Profile Power Limit Monitor
+
+[Service]
+Type=exec
+ExecStart=/usr/local/bin/ppd-power-tune.sh daemon
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-## 自定义服务 1：clash-verge-service.service
+## 自定义服务：clash-verge-service.service
 
 ```ini
 [Unit]
@@ -53,28 +43,14 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-## 自定义服务 2：ppd-profile-monitor.service
-
-```ini
-[Unit]
-Description=PPD Profile Power Limit Monitor
-
-[Service]
-Type=exec
-ExecStart=/usr/local/bin/ppd-power-tune.sh daemon
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-```
-
 ## 用户 autostart：Clash Verge
 
-```ini
-~/.config/autostart/Clash Verge.desktop
-[Desktop Entry]
-Type=Application
-Name=Clash Verge
-Exec=/usr/bin/clash-verge
+路径：`~/.config/autostart/Clash Verge.desktop`（见 `home/` 目录）
+
+## AI 恢复命令
+
+```bash
+sudo cp ~/refs/arch-linux-config/files/usr/local/bin/ppd-power-tune.sh /usr/local/bin/
+sudo chmod +x /usr/local/bin/ppd-power-tune.sh
+sudo systemctl daemon-reload
 ```

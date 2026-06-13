@@ -62,6 +62,93 @@ base-devel inotify-tools
 stress-ng intel-undervolt
 ```
 
+## AI 安装命令
+
+### 官方包
+
+```bash
+# Core/系统
+sudo pacman -S --needed base grub efibootmgr os-prober
+sudo pacman -S --needed networkmanager dhcpcd
+sudo pacman -S --needed snapper grub-btrfs snap-pac btrfs-assistant btrfs-progs
+sudo pacman -S --needed pacman-contrib
+sudo pacman -S --needed power-profiles-daemon
+sudo pacman -S --needed pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber
+sudo pacman -S --needed ufw
+sudo pacman -S --needed zram-generator
+sudo pacman -S --needed linux-firmware
+sudo pacman -S --needed linux-zen-headers linux-lts-headers
+sudo pacman -S --needed intel-ucode intel-media-driver sof-firmware alsa-firmware alsa-ucm-conf
+sudo pacman -S --needed bluez
+
+# GNOME 桌面
+sudo pacman -S --needed gnome-desktop gnome-shell gdm gnome-control-center gnome-software
+sudo pacman -S --needed gnome-tweaks gnome-text-editor gnome-calculator gnome-clocks
+sudo pacman -S --needed gnome-disk-utility gnome-keyring
+sudo pacman -S --needed baobab loupe showtime snapshot file-roller
+sudo pacman -S --needed ghostty
+
+# 应用
+sudo pacman -S --needed chromium
+sudo pacman -S --needed mission-center
+sudo pacman -S --needed foliate fragments
+sudo pacman -S --needed nautilus-python
+sudo pacman -S --needed neovim github-cli
+sudo pacman -S --needed fastfetch yazi
+sudo pacman -S --needed flatpak
+sudo pacman -S --needed exfat-utils
+
+# 图形驱动
+sudo pacman -S --needed vulkan-intel vulkan-icd-loader vulkan-tools
+sudo pacman -S --needed lib32-vulkan-intel lib32-vulkan-icd-loader
+
+# 字体
+sudo pacman -S --needed noto-fonts noto-fonts-emoji noto-fonts-cjk
+sudo pacman -S --needed ttf-jetbrains-mono terminus-font
+sudo pacman -S --needed adobe-source-han-sans-cn-fonts
+
+# 输入法
+sudo pacman -S --needed fcitx5 fcitx5-rime fcitx5-gtk fcitx5-qt fcitx5-configtool
+
+# Shell
+sudo pacman -S --needed zsh zsh-autosuggestions zsh-completions zsh-syntax-highlighting
+sudo pacman -S --needed zsh-theme-powerlevel10k-git
+
+# AUR 助手
+sudo pacman -S --needed yay paru
+sudo pacman -S --needed archlinuxcn-keyring
+
+# 开发
+sudo pacman -S --needed base-devel inotify-tools
+
+# 硬件调优
+sudo pacman -S --needed stress-ng intel-undervolt
+```
+
+### AUR 包
+
+```bash
+yay -S --needed clash-verge-rev-bin
+yay -S --needed visual-studio-code-bin
+yay -S --needed opencode-bin
+yay -S --needed moekoemusic-bin
+yay -S --needed wechat-bin
+yay -S --needed thinkfan
+yay -S --needed catppuccin-gtk-theme-macchiato
+yay -S --needed rime-ice-git
+```
+
+### Flatpak
+
+```bash
+sudo flatpak install -y flathub \
+  io.github.fabrialberio.pinapp \
+  org.freedesktop.Platform.GL.default \
+  org.freedesktop.Platform.GL32.default \
+  org.freedesktop.Platform.VAAPI.Intel \
+  org.gnome.Platform.Codecs
+```
+
 ## AUR 包（7 个）
 
 | 包 | 说明 |

@@ -1,0 +1,9 @@
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = mkinitcpio
+
+[Action]
+Description = Ensuring MODULES=(thinkpad_acpi) in /etc/mkinitcpio.conf...
+When = PostTransaction
+Exec = /bin/sh -c 'grep -q "^MODULES=(thinkpad_acpi)" /etc/mkinitcpio.conf || sed -i "s/^MODULES=()/MODULES=(thinkpad_acpi)/" /etc/mkinitcpio.conf'

@@ -35,6 +35,44 @@ pipewire-pulse.socket
 pipewire.socket
 ```
 
+## AI 启用命令
+
+### 系统服务
+
+```bash
+sudo systemctl enable gdm.service
+sudo systemctl enable NetworkManager.service
+sudo systemctl enable NetworkManager-wait-online.service
+sudo systemctl enable bluetooth.service
+sudo systemctl enable power-profiles-daemon.service
+sudo systemctl enable ufw.service
+sudo systemctl enable thinkfan.service thinkfan-sleep.service thinkfan-wakeup.service
+sudo systemctl enable grub-btrfsd.service
+sudo systemctl enable ppd-profile-monitor.service
+sudo systemctl enable clash-verge-service.service
+```
+
+### 用户服务
+
+```bash
+systemctl --user enable pipewire.service
+systemctl --user enable pipewire-pulse.service
+systemctl --user enable wireplumber.service
+systemctl --user enable xdg-user-dirs.service
+systemctl --user enable gnome-keyring-daemon.socket
+systemctl --user enable p11-kit-server.socket
+systemctl --user enable pipewire-pulse.socket
+systemctl --user enable pipewire.socket
+```
+
+### UFW 防火墙
+
+```bash
+sudo ufw enable
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+```
+
 ## 当前启动目标
 
 `graphical.target`（初始 Arch 安装默认 `multi-user.target`，由 `gdm` 拉入）

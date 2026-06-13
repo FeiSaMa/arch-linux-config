@@ -1,21 +1,35 @@
 # 用户配置文件变更
 
-## ~/.zshrc
+所有文件的实际内容见 `home/` 目录。
+
+## 文件清单
+
+| 目标路径 | 仓库路径 |
+|----------|---------|
+| `~/.zshrc` | `home/.zshrc` |
+| `~/.p10k.zsh` | `home/.p10k.zsh` |
+| `~/.config/ghostty/config` | `home/.config/ghostty/config` |
+| `~/.config/fcitx5/config` | `home/.config/fcitx5/config` |
+| `~/.config/gtk-3.0/settings.ini` | `home/.config/gtk-3.0/settings.ini` |
+| `~/.config/mimeapps.list` | `home/.config/mimeapps.list` |
+| `~/.config/autostart/Clash Verge.desktop` | `home/.config/autostart/Clash Verge.desktop` |
+| `~/.local/share/fcitx5/rime/default.custom.yaml` | `home/.local/share/fcitx5/rime/default.custom.yaml` |
+
+## 额外说明
+
+### ~/.zshrc
 
 - Oh My Zsh + Powerlevel10k 主题
 - 历史设置：`HISTSIZE=1000`、`SAVEHIST=1000`、`SHARE_HISTORY`、`EXTENDED_HISTORY`
 - `HIST_IGNORE_DUPS`、`HIST_IGNORE_SPACE`
-- 加载插件：
-  - `zsh-autosuggestions`（策略：history → completion）
-  - `zsh-syntax-highlighting`
-  - `compinit`（菜单补全）
-- 自定义函数：`fan()` → 读取 ThinkPad 风扇 RPM
+- 插件：`zsh-autosuggestions`、`zsh-syntax-highlighting`、`compinit`
+- 自定义函数：`fan()` — 读取 ThinkPad 风扇 RPM
 
-## ~/.p10k.zsh（199 行）
+### ~/.p10k.zsh
 
-Powerlevel10k 配置（首次运行 `p10k configure` 生成，包含 prompt 样式、图标、颜色等）
+Powerlevel10k 主题配置（199 行）。
 
-## ~/.config/ghostty/config
+### ~/.config/ghostty/config
 
 ```ini
 theme = catppuccin-macchiato.conf
@@ -29,49 +43,29 @@ cursor-style = block
 cursor-style-blink = true
 ```
 
-## ~/.config/nvim/（LazyVim 模板）
+### ~/.config/nvim/
 
-从 `https://github.com/LazyVim/starter` 克隆的标准配置：
-- `init.lua` — 入口
-- `lazy-lock.json` — 插件锁定
-- `lazyvim.json` — LazyVim 设置
-- `.neoconf.json` — Neovim 项目配置
+LazyVim starter 模板：`git clone https://github.com/LazyVim/starter ~/.config/nvim`
 
-## ~/.local/share/fcitx5/rime/default.custom.yaml
-
-```yaml
-patch:
-  __include: rime_ice_suggestion:/
-```
-
-## ~/.config/gtk-3.0/settings.ini
-
-```ini
-[Settings]
-gtk-application-prefer-dark-theme=0
-```
-
-## ~/.config/fcitx5/config
-
-```ini
-[Hotkey/TriggerKeys]
-0=Super+space
-[Hotkey/AltTriggerKeys]
-0=Shift_L
-[Hotkey/PrevPage]
-0=Up
-[Hotkey/NextPage]
-0=Down
-```
-
-## ~/.config/mimeapps.list
+### ~/.config/mimeapps.list
 
 ```ini
 x-scheme-handler/clash=clash-verge.desktop;
 ```
 
-## ~/.config/monitors.xml
+## AI 恢复命令
 
-- ThinkPad 内置屏幕 eDP-1 (AUO B140UAX01.1)
-- 1920×1200 @ 60Hz
-- 125% 缩放
+```bash
+mkdir -p ~/.config/ghostty ~/.config/fcitx5 ~/.config/gtk-3.0 ~/.config/autostart ~/.local/share/fcitx5/rime
+
+# AI 逐文件读取 home/ 目录并写入对应路径
+# AI 读取 home/.zshrc → tee ~/.zshrc
+# AI 读取 home/.config/ghostty/config → tee ~/.config/ghostty/config
+# ...
+
+# Neovim
+git clone https://github.com/LazyVim/starter ~/.config/nvim
+
+# 切换 shell
+chsh -s /usr/bin/zsh
+```
