@@ -20,6 +20,7 @@ Type=exec
 ExecStart=/usr/local/bin/ppd-power-tune.sh daemon
 Restart=on-failure
 RestartSec=5
+TimeoutStartSec=10
 
 [Install]
 WantedBy=multi-user.target

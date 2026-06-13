@@ -1,6 +1,6 @@
 # 启用的服务
 
-## 系统服务（15 个）
+## 系统服务（13 个新增 + ~3 个默认）
 
 **初始 Arch 默认（~3 个）：** `getty@tty1.service`、`systemd-timesyncd.service`
 

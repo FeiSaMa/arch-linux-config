@@ -45,7 +45,6 @@ adobe-source-han-sans-cn-fonts
 
 # 输入法
 fcitx5 fcitx5-rime fcitx5-gtk fcitx5-qt fcitx5-configtool
-rime-ice-git
 
 # Shell
 zsh zsh-autosuggestions zsh-completions zsh-syntax-highlighting
