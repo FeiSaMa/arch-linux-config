@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """ThinkPad Router — 实时网络请求监视器"""
-import curses, json, time, os, urllib.request
+import curses, json, time, os, urllib.request, sys
 from datetime import datetime
 
 CONFIG = os.path.expanduser("~/.local/share/io.github.clash-verge-rev.clash-verge-rev")
@@ -28,11 +28,13 @@ def elapsed_str(start_str):
 def main(stdscr):
     curses.curs_set(0)
     curses.start_color()
-    curses.init_pair(1, curses.COLOR_GREEN, -1)
-    curses.init_pair(2, curses.COLOR_YELLOW, -1)
-    curses.init_pair(3, curses.COLOR_RED, -1)
-    curses.init_pair(4, curses.COLOR_CYAN, -1)
-    curses.init_pair(5, curses.COLOR_MAGENTA, -1)
+    if not curses.has_colors():
+        curses.use_default_colors()
+    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(4, curses.COLOR_CYAN, curses.COLOR_BLACK)
+    curses.init_pair(5, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
 
     while True:
         stdscr.erase()
@@ -103,4 +105,22 @@ def main(stdscr):
         stdscr.refresh()
         time.sleep(2)
 
-curses.wrapper(main)
+if "--test" in sys.argv:
+    while True:
+        data = api("/connections")
+        conns = data.get("connections", [])
+        total_up = sum(c.get("upload", 0) for c in conns)
+        total_down = sum(c.get("download", 0) for c in conns)
+        print(f"\033[H\033[J[{time.strftime('%H:%M:%S')}] 活跃: {len(conns)}  ↑ {fmt_bytes(total_up)}  ↓ {fmt_bytes(total_down)}")
+        print(f"{'主机':<28} {'目标':<22} {'代理':<18} {'流量':<8} {'耗时':<6}")
+        print("-" * 80)
+        for c in conns[:20]:
+            m = c.get("metadata", {})
+            host = m.get("host", "") or m.get("destinationIP", "")
+            dst = f"{m.get('destinationIP','?')}:{m.get('destinationPort','?')}"
+            chain = (c.get("chains") or ["?"])[0]
+            down = c.get("download", 0) + c.get("upload", 0)
+            print(f"{host[:27]:<28} {dst[:21]:<22} {chain[:17]:<18} {fmt_bytes(down):<8} {elapsed_str(c.get('start',''))}")
+        time.sleep(2)
+else:
+    curses.wrapper(main)
