@@ -152,7 +152,7 @@ sudo flatpak install -y flathub \
   org.freedesktop.Platform.codecs-extra
 ```
 
-## AUR 包（7 个）
+## AUR 包（8 个）
 
 | 包 | 说明 |
 |-----|------|

@@ -6,10 +6,11 @@
 >
 > | 步骤 | 内容 |
 > |------|------|
-> | 1 | [Shorin ArchLinux → 手动安装](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) |
-> | 2 | 安装 GNOME 桌面（手动，pacman 走国内镜像） |
-> | 3 | 创建 snapshot（如 "after GNOME"） |
-> | 4 | **从这里开始 — 以下用 opencode 恢复** |
+> | 1 | [Shorin ArchLinux → 手动安装](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) → 创建 snap "before desktop" |
+> | 2 | 安装 GNOME 桌面（手动，pacman 走国内镜像）→ 创建 snap "after GNOME" |
+> | 3 | **用 opencode 恢复全部**（如出问题可回滚到 snap "after GNOME"） |
+
+> **Snapper 回滚指南：** 如果恢复过程中出现问题，重启进入 GRUB → 选择"before desktop"或"after GNOME"快照启动项即可回滚。`snap-pac` 会在每次 pacman 事务前自动创建快照作为保险。
 >
 > **起始状态：**
 > - ✅ Arch base + Btrfs + GRUB + NetworkManager + zram + locale/时区/用户
@@ -432,13 +433,15 @@ sed "s|/home/feisama/|/home/$USER/|g" ~/refs/arch-linux-config/gnome/dconf.conf 
 # 安装 GNOME Shell 扩展
 bash ~/refs/arch-linux-config/gnome/extensions.sh
 
-# 复制壁纸
+# 复制壁纸（同时覆盖 dconf 中旧路径）
 mkdir -p ~/.local/share/backgrounds
 cp ~/refs/arch-linux-config/gnome/wallpaper.jpg ~/.local/share/backgrounds/
 gsettings set org.gnome.desktop.background picture-uri \
   "file://$HOME/.local/share/backgrounds/wallpaper.jpg"
 gsettings set org.gnome.desktop.screensaver picture-uri \
   "file://$HOME/.local/share/backgrounds/wallpaper.jpg"
+gsettings set org.gnome.shell.extensions.unlock-dialog-background picture-uri \
+  "$HOME/.local/share/backgrounds/wallpaper.jpg" 2>/dev/null || true
 
 # Fcitx5 Rime 输入法配置（复制 Rime 雾凇词库）
 # 注：rime-ice-git 包安装后会自动配置，custom.yaml 已部署
