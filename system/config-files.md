@@ -27,10 +27,10 @@
 
 ```ini
 GRUB_DEFAULT=saved
-GRUB_CMDLINE_LINUX_DEFAULT="loglevel=5 zswap.enabled=0 nmi_watchdog=0 mitigations=off rootflags=subvol=@"
+GRUB_CMDLINE_LINUX_DEFAULT="loglevel=5 zswap.enabled=0 nmi_watchdog=0 mitigations=off"
 ```
 
-注：`rootflags=subvol=@` 是 Btrfs 子卷参数，新机器需根据实际分区调整 UUID 和子卷名。
+注：`rootflags=subvol=@` 已从 `GRUB_CMDLINE_LINUX_DEFAULT` 中移除，由 `grub-mkconfig` 自动从 fstab 追加，避免重复。
 
 ### /etc/fstab
 
