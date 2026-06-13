@@ -20,8 +20,9 @@
 - 分辨率：1920x1200（`GRUB_GFXMODE=1920x1200`）
 - 语言：`GRUB_LANGCODE=en_US`（英文，通过修改 `/etc/grub.d/00_header` 和 `/usr/bin/grub-mkconfig` 使该变量生效）
 - 字体：`GRUB_FONT=/boot/grub/fonts/ter-u32n-32.pf2`
-- 主题：`/usr/share/grub/themes/catppuccin-macchiato-grub-theme/theme.txt`
-- 主题字体：`ter-u32n-32.pf2`（Terminus 等宽字体 32px，替换了原 JetBrains Mono）
+- 主题：`/boot/grub/themes/CyberGRUB-2077/theme.txt`（自定义赛博朋克主题）
+- 菜单字体：`Noto Sans CJK JP Regular 24`（支持中文显示）
+- 终端字体：`Noto Sans CJK JP Regular 16`
 - 检测 Windows Boot Manager（`os-prober` 启用）
 - 快照启动支持：`grub-btrfsd` + snapper
 
