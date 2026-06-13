@@ -22,6 +22,12 @@ pkexec grub-mkconfig -o /boot/grub/grub.cfg     # 当前机器
 sudo grub-mkconfig -o /boot/grub/grub.cfg        # 新机器
 ```
 
+### GRUB 主题 CyberGRUB-2077
+- 主题文件有两份：`/efi/grub/themes/CyberGRUB-2077/theme.txt`（ESP）和 `/boot/grub/themes/CyberGRUB-2077/theme.txt`（Btrfs），**修改必须同步两份**
+- 菜单项字体：`Rajdhani Regular 24`（上游原值）；中文通过 GRUB 字体回退自动使用 Noto Sans CJK 显示
+- 主题 refs 配置路径：`~/refs/arch-linux-config/files/boot/grub/themes/CyberGRUB-2077/theme.txt`
+- 上游仓库：`https://github.com/adnksharp/CyberGRUB-2077`
+
 ## 配置同步规则
 
 ### 系统配置参考

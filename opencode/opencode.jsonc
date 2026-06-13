@@ -9,14 +9,16 @@
   // 默认使用 V4-Flash（平衡速度与能力）
   "model": "deepseek/deepseek-v4-flash",
 
-  // 小模型用于标题生成等轻量任务 - 使用最便宜的 Flash
-  "small_model": "deepseek/deepseek-v4-flash",
-
   // 默认使用 build agent
   "default_agent": "build",
 
   "provider": {
-    "deepseek": {}
+    "deepseek": {
+      "options": {
+        "timeout": 600000,
+        "chunkTimeout": 30000
+      }
+    }
   },
 
   "instructions": ["~/.config/opencode/instructions/system.md"],
@@ -31,6 +33,15 @@
   "lsp": true,
 
   // ============================================================
+  // 上下文压缩配置
+  // ============================================================
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "reserved": 10000
+  },
+
+  // ============================================================
   // Agent 体系：5 个专用 Agent 覆盖不同复杂度场景
   // ============================================================
   "agent": {
@@ -40,6 +51,7 @@
       "model": "deepseek/deepseek-v4-pro",
       "description": "默认开发 Agent，用于复杂代码编写、架构设计、重构等需要深度推理的任务",
       "color": "#4FC3F7",
+      "temperature": 0.3,
       "permission": {
         "edit": "allow",
         "bash": "allow"
@@ -50,6 +62,7 @@
       "model": "deepseek/deepseek-v4-flash",
       "description": "规划和代码审查 Agent，用 Flash 做快速分析和方案设计，只读模式",
       "color": "#81C784",
+      "temperature": 0.1,
       "permission": {
         "edit": "deny",
         "bash": "deny"
@@ -60,6 +73,7 @@
     "code": {
       "mode": "all",
       "model": "deepseek/deepseek-v4-flash",
+      "description": "编码专用 Agent，低温度高确定性，适合代码生成与修改",
       "color": "#FFB74D",
       "temperature": 0.2,
       "permission": {
@@ -82,6 +96,7 @@
     "explore": {
       "mode": "all",
       "model": "deepseek/deepseek-v4-flash",
+      "description": "快速代码库探索 Agent，只读模式，用于文件搜索、代码分析等",
       "temperature": 0.1,
       "permission": {
         "edit": "deny",
