@@ -18,6 +18,8 @@
 | `/etc/locale.conf` | `files/etc/locale.conf` |
 | `/etc/hostname` | `files/etc/hostname` |
 | `/etc/adjtime` | `files/etc/adjtime` |
+| `/etc/systemd/system/ppd-profile-monitor.service` | `files/etc/systemd/system/ppd-profile-monitor.service` |
+| `/etc/systemd/system/clash-verge-service.service` | `files/etc/systemd/system/clash-verge-service.service` |
 
 ## 额外说明
 

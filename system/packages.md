@@ -145,11 +145,11 @@ yay -S --needed rime-ice-git
 
 ```bash
 sudo flatpak install -y flathub \
+  com.mattjakeman.ExtensionManager \
   io.github.fabrialberio.pinapp \
   org.freedesktop.Platform.GL.default \
-  org.freedesktop.Platform.GL32.default \
   org.freedesktop.Platform.VAAPI.Intel \
-  org.gnome.Platform.Codecs
+  org.freedesktop.Platform.codecs-extra
 ```
 
 ## AUR 包（7 个）
@@ -164,16 +164,17 @@ sudo flatpak install -y flathub \
 | thinkfan | ThinkPad 风扇守护进程 |
 | catppuccin-gtk-theme-macchiato | GTK 主题 |
 
-## Flatpak（7 个，system 级别）
+## Flatpak（system 级别）
 
-```
-Extension Manager
-Pins (io.github.fabrialberio.pinapp)
-Mesa (org.freedesktop.Platform.GL.default) x2
-Intel VAAPI driver
-GNOME Codecs Extra
-GNOME Application Platform v50
-```
+| 名称 | Flatpak ID |
+|------|-----------|
+| Extension Manager | `com.mattjakeman.ExtensionManager` |
+| Pins | `io.github.fabrialberio.pinapp` |
+| Mesa (2 refs) | `org.freedesktop.Platform.GL.default` |
+| Intel VAAPI driver | `org.freedesktop.Platform.VAAPI.Intel` |
+| Codecs Extra | `org.freedesktop.Platform.codecs-extra` |
+
+`org.gnome.Platform` 运行时由上述包自动依赖安装，无需显式安装。
 
 ## 孤儿包
 

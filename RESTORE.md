@@ -79,7 +79,7 @@ ls ~/.config/opencode/opencode.jsonc ~/.config/opencode/instructions/system.md
 ### 失败处理
 
 - `pacman` 失败：检查网络连接和镜像源
-- 重启 opencode 使新配置生效
+- opencode 配置已复制到 ~/.config/opencode/，下次启动自动生效。当前会话不受影响，AI 已可直接读取仓库文件
 - 检测到 GitHub 访问失败时，检查 `clash-verge-service.service` 是否已启动且订阅已配置
 
 ---
@@ -178,12 +178,12 @@ yay -S --needed rime-ice-git
 
 ```bash
 sudo flatpak install -y flathub \
+  com.mattjakeman.ExtensionManager \
   io.github.fabrialberio.pinapp \
   org.freedesktop.Platform.GL.default \
-  org.freedesktop.Platform.GL32.default \
   org.freedesktop.Platform.VAAPI.Intel \
-  org.gnome.Platform.Codecs
-# 注：Extension Manager 通过 gnome-extensions 安装，不是 Flatpak 方式
+  org.freedesktop.Platform.codecs-extra
+# 注：org.gnome.Platform 运行时由上述包自动依赖安装
 ```
 
 ### 验证
@@ -239,6 +239,8 @@ AI 读取 `files/etc/thinkfan.conf` → 写入 `/etc/thinkfan.conf`（非 ThinkP
 AI 读取 `files/etc/pacman.conf` → 写入 `/etc/pacman.conf`
 AI 读取 `files/etc/locale.conf` → 写入 `/etc/locale.conf`
 AI 读取 `files/etc/hostname` → 写入 `/etc/hostname`
+AI 读取 `files/etc/systemd/system/ppd-profile-monitor.service` → 写入 `/etc/systemd/system/ppd-profile-monitor.service`
+AI 读取 `files/etc/systemd/system/clash-verge-service.service` → 写入 `/etc/systemd/system/clash-verge-service.service`
 AI 读取 `files/etc/adjtime` 了解格式 → 不复制旧时间戳，改用 `hwclock --systohc --utc` 生成
 
 ```bash
