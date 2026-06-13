@@ -10,20 +10,30 @@
 |------|------|------|
 | 1 | 手动安装 Arch Linux（Btrfs + GRUB + 基础配置） | [Shorin ArchLinux → 手动安装](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) |
 | 2 | 创建 snapper #23 快照 "before desktop" | — |
-| 3 | **从这里开始用 opencode 恢复** | `RESTORE.md` |
+| 3 | 安装 Clash Verge + 配置代理（国内网络必需） | 见下方 |
+| 4 | **从这里开始用 opencode 恢复** | `RESTORE.md` |
 
 ## 快速恢复
 
 ```bash
-# 1. 安装前提（添加 archlinuxcn 源 → 安装 yay + opencode）
+# 1. 安装前提（添加 archlinuxcn 源）
 echo -e "\n[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" | sudo tee -a /etc/pacman.conf
 sudo pacman -Sy archlinuxcn-keyring yay git base-devel
-yay -S opencode-bin
 
-# 2. 克隆配置
+# 2. 安装 Clash Verge + 启动代理（国内网络必需）
+#    archlinuxcn 有预编译包，无需翻墙
+yay -S clash-verge-rev-bin
+sudo systemctl enable --now clash-verge-service.service
+
+# 3. 设置代理环境变量（clash 默认 HTTP 代理端口 7890）
+export HTTP_PROXY=http://127.0.0.1:7890
+export HTTPS_PROXY=http://127.0.0.1:7890
+
+# 4. 安装 opencode + 克隆配置
+yay -S opencode-bin
 git clone https://github.com/FeiSaMa/arch-linux-config ~/refs/arch-linux-config
 
-# 3. 启动 opencode，告诉它：
+# 5. 启动 opencode，告诉它：
 #    "根据 ~/refs/arch-linux-config/RESTORE.md 恢复我的系统"
 opencode
 ```

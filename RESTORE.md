@@ -18,15 +18,21 @@
 ## 使用方式
 
 ```bash
-# 1. 一键安装 yay + opencode（依托 archlinuxcn 源）
+# 1. 安装前提（添加 archlinuxcn 源）
 echo -e "\n[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" | sudo tee -a /etc/pacman.conf
 sudo pacman -Sy archlinuxcn-keyring yay git base-devel
-yay -S opencode-bin
 
-# 2. 克隆本仓库
+# 2. 安装 Clash Verge + 启动代理（国内网络必需）
+yay -S clash-verge-rev-bin
+sudo systemctl enable --now clash-verge-service.service
+export HTTP_PROXY=http://127.0.0.1:7890
+export HTTPS_PROXY=http://127.0.0.1:7890
+
+# 3. 安装 opencode + 克隆配置（现在走代理，GitHub 可访问）
+yay -S opencode-bin
 git clone https://github.com/FeiSaMa/arch-linux-config ~/refs/arch-linux-config
 
-# 3. 启动 opencode，告诉他：
+# 4. 启动 opencode，告诉他：
 #    "根据 ~/refs/arch-linux-config/RESTORE.md 恢复我的系统"
 opencode
 ```
@@ -43,6 +49,7 @@ opencode
 
 ```bash
 # 安装基础开发工具
+# 注：若代理已生效，GitHub 下载（rustup、docker 等）走代理，否则使用国内镜像
 sudo pacman -S --needed curl cmake docker docker-compose go rustup \
   nodejs npm python-pip openssh ripgrep fd fzf jq unzip tmux
 
@@ -70,6 +77,7 @@ ls ~/.config/opencode/opencode.jsonc ~/.config/opencode/instructions/system.md
 
 - `pacman` 失败：检查网络连接和镜像源
 - 重启 opencode 使新配置生效
+- 从 TTY 启动 opencode 时，`HTTP_PROXY` 环境变量可能未继承。AI 检测到 GitHub 访问失败时应提示用户设置代理，或检查 `clash-verge-service` 是否运行
 
 ---
 
@@ -153,7 +161,7 @@ sudo pacman -S --needed stress-ng intel-undervolt
 **AUR 包：**
 
 ```bash
-yay -S --needed clash-verge-rev-bin
+# clash-verge-rev-bin 已在 bootstrap 中安装（代理必需）
 yay -S --needed visual-studio-code-bin
 # opencode-bin 已在 bootstrap 中安装，此处不重复
 yay -S --needed moekoemusic-bin

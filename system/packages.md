@@ -130,7 +130,7 @@ sudo pacman -S --needed stress-ng intel-undervolt
 ### AUR 包
 
 ```bash
-yay -S --needed clash-verge-rev-bin
+# clash-verge-rev-bin 已在 bootstrap 中安装（国内网络代理必需）
 yay -S --needed visual-studio-code-bin
 # opencode-bin 已在 bootstrap 中安装（首次安装需要），此处可跳过
 # yay -S --needed opencode-bin
