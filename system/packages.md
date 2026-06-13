@@ -54,6 +54,8 @@ zsh-theme-powerlevel10k-git
 yay paru
 archlinuxcn-keyring
 
+# 注：paru 仅在 packages.md 中记录，RESTORE.md 中未安装（yay 已覆盖 AUR 需求）
+
 # 开发
 base-devel inotify-tools
 
