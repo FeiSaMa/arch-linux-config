@@ -1,16 +1,25 @@
 # 系统提权规则
 
 ## 权限提升
-当需要 root 权限时，始终使用 `pkexec` 而非 `sudo`。
+- 当前机器（pam_faillock 已配置）：使用 `pkexec`，sudo 失败 3 次会锁定 10 分钟
+- 新安装的机器（pam_faillock 未配置）：使用 `sudo`，pkexec 在 TTY 下需要 polkit 代理
 
-- 原因：本机的 `pam_faillock` 配置在 sudo 失败 3 次后锁定账户 10 分钟
-- `pkexec` 会弹出 GNOME 图形化授权对话框，体验更好
-- 示例：`pkexec cp file /etc/somewhere`
+AI 检测规则：`pkexec --version` 成功 → 用 pkexec；否则用 sudo。
+
+示例：
+```bash
+# 新机器（推荐）
+sudo cp file /etc/somewhere
+
+# 当前机器（pam_faillock 已配置）
+pkexec cp file /etc/somewhere
+```
 
 ## GRUB 配置
 GRUB 配置文件位于 `/etc/default/grub`，修改后需运行：
-```
-pkexec grub-mkconfig -o /boot/grub/grub.cfg
+```bash
+pkexec grub-mkconfig -o /boot/grub/grub.cfg     # 当前机器
+sudo grub-mkconfig -o /boot/grub/grub.cfg        # 新机器
 ```
 
 ## 配置同步规则
@@ -24,7 +33,7 @@ pkexec grub-mkconfig -o /boot/grub/grub.cfg
 ### 同步到 Git
 对系统或硬件做出任何更改后，需同步到仓库并推送到 GitHub：
 
-更新 `~/refs/arch-linux-config/` 中的文件（含 `hardware-tuning/` 子目录），然后：
+更新 `~/refs/arch-linux-config/` 中的文件（含 `hardware/` 子目录），然后：
 ```
 git -C ~/refs/arch-linux-config add -A
 git -C ~/refs/arch-linux-config commit -m "描述更改内容"

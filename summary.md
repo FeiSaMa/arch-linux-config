@@ -65,6 +65,6 @@
 
 ---
 
-所有完整文件见本目录下各子目录（`system/`、`desktop/`、`hardware/`、`network/`、`scripts/`、`opencode/`、`home/`、`files/`、`gnome/`）。
+所有完整文件见本目录下各子目录（`system/`、`desktop/`、`hardware/`、`network/`、`scripts/`、`opencode/`、`home/`、`files/`、`gnome/`），包含 Clash 代理配置（`network/clash/`）。
 
 恢复指南见 `RESTORE.md` — AI 可读的 7 阶段恢复手册。

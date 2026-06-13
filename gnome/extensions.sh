@@ -40,7 +40,7 @@ install_extension() {
 
 # 扩展列表 (UUID → EGO/Release 下载链接)
 # 注: .shell-extension.zip 下载链接从 extensions.gnome.org 获取
-# 格式: install_extension "UUID" "下载URL"
+# 格式: install_extension "扩展UUID" "下载URL"
 # 警告：URL 中的版本号会随扩展更新而过期。
 # 如果安装失败，请访问 https://extensions.gnome.org 获取最新版本号并更新本文件。
 # 备用方案：使用 Extension Manager 应用手动安装。

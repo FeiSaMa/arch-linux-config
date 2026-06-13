@@ -18,6 +18,9 @@
 ```bash
 # 1. 安装前提（添加 archlinuxcn 源）
 echo -e "\n[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" | sudo tee -a /etc/pacman.conf
+# 初始化 pacman keyring（新机器必需）
+sudo pacman-key --init 2>/dev/null || true
+sudo pacman-key --populate archlinux 2>/dev/null || true
 sudo pacman -Sy archlinuxcn-keyring yay git base-devel
 
 # 2. 安装 Clash Verge 代理核心（CLI 守护进程，无需桌面）
