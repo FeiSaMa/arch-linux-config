@@ -29,10 +29,10 @@ while True:
     known = now
 
     os.system("clear")
-    print(f"\033[36m\033[1m  ThinkPad Router - 实时网络请求  \033[0m")
-    print(f"\033[33m  活跃: {len(conns)}  \u2191 {fmt(up)}  \u2193 {fmt(down)}  |  {time.strftime('%H:%M:%S')}\033[0m")
+    print(f"\033[36m\033[1m  ThinkPad Router - Live Traffic  \033[0m")
+    print(f"\033[33m  Active: {len(conns)}  UP {fmt(up)}  DOWN {fmt(down)}  |  {time.strftime('%H:%M:%S')}\033[0m")
     print(f"  {'=' * 60}")
-    print(f"  {'时间':<8} {'主机':<26} {'目标':<20} {'代理':<10}")
+    print(f"  {'TIME':<8} {'HOST':<26} {'DEST':<20} {'VIA':<10}")
     print(f"  {'=' * 60}")
 
     for c in conns:
