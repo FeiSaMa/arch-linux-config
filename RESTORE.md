@@ -2,7 +2,7 @@
 
 > 在刚装好的 Arch Linux 上通过 opencode 一键恢复系统。
 >
-> **前提：** 已按 [Shorin ArchLinux 安装指南](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) 完成系统安装，创建 snapper #23 快照 "before desktop"
+> **前提：** 已按 [Shorin ArchLinux 安装指南 → 手动安装](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) 完成系统安装，创建 snapper #23 快照 "before desktop"
 >
 > **起始状态：** snapper #23 "before desktop" 快照点
 > - ✅ Arch base + 网络 + pacman

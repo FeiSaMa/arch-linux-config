@@ -8,7 +8,7 @@
 
 | 步骤 | 内容 | 参考 |
 |------|------|------|
-| 1 | 安装 Arch Linux（Btrfs + GRUB + 基础配置） | [Shorin ArchLinux 安装指南](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) |
+| 1 | 手动安装 Arch Linux（Btrfs + GRUB + 基础配置） | [Shorin ArchLinux → 手动安装](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) |
 | 2 | 创建 snapper #23 快照 "before desktop" | — |
 | 3 | **从这里开始用 opencode 恢复** | `RESTORE.md` |
 
