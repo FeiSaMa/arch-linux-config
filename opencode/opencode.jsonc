@@ -45,16 +45,15 @@
   // Agent 体系：5 个专用 Agent 覆盖不同复杂度场景
   // ============================================================
   "agent": {
-    // ---- 主要 Agent ----
-    "build": {
+    // ---- Tab 顺序: explore → plan → build → code → quick ----
+    "explore": {
       "mode": "all",
-      "model": "deepseek/deepseek-v4-pro",
-      "description": "默认开发 Agent，用于复杂代码编写、架构设计、重构等需要深度推理的任务",
-      "color": "#4FC3F7",
-      "temperature": 0.3,
+      "model": "deepseek/deepseek-v4-flash",
+      "description": "快速代码库探索 Agent，只读模式，用于文件搜索、代码分析等",
+      "temperature": 0.1,
       "permission": {
-        "edit": "allow",
-        "bash": "allow"
+        "edit": "deny",
+        "bash": "deny"
       }
     },
     "plan": {
@@ -68,8 +67,17 @@
         "bash": "deny"
       }
     },
-
-    // ---- 全部改为 all，Tab 循环切换 + @ 都能用 ----
+    "build": {
+      "mode": "all",
+      "model": "deepseek/deepseek-v4-pro",
+      "description": "默认开发 Agent，用于复杂代码编写、架构设计、重构等需要深度推理的任务",
+      "color": "#4FC3F7",
+      "temperature": 0.3,
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
+      }
+    },
     "code": {
       "mode": "all",
       "model": "deepseek/deepseek-v4-flash",
@@ -91,16 +99,6 @@
       "permission": {
         "edit": "allow",
         "bash": "allow"
-      }
-    },
-    "explore": {
-      "mode": "all",
-      "model": "deepseek/deepseek-v4-flash",
-      "description": "快速代码库探索 Agent，只读模式，用于文件搜索、代码分析等",
-      "temperature": 0.1,
-      "permission": {
-        "edit": "deny",
-        "bash": "deny"
       }
     }
   }
