@@ -21,10 +21,12 @@ echo -e "\n[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arc
 sudo pacman -Sy archlinuxcn-keyring yay git base-devel
 yay -S opencode-bin clash-verge-rev-bin
 
-# 2. 配置 Clash 订阅（打开 Clash Verge GUI → 订阅 → 添加 URL）
-#    订阅链接见克隆后的仓库: refs/arch-linux-config/network/clash/profiles.yaml
+# 2a. 配置 Clash 订阅 + 启动服务
+#    订阅 URL: https://feed.iggv5.com/c/714a8058-614e-4068-965a-682d2263d5b2/platform/clash/iGG-iGuge
+#    打开 Clash Verge GUI → 订阅 → 添加 URL → 切换到可用节点
+sudo systemctl enable --now clash-verge-service.service
 
-# 3. 克隆仓库
+# 3. 克隆仓库（走代理，GitHub 可访问）
 git clone https://github.com/FeiSaMa/arch-linux-config ~/refs/arch-linux-config
 
 # 4. 启动 opencode，告诉它：

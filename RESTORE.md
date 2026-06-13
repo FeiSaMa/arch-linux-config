@@ -25,12 +25,14 @@ echo -e "\n[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arc
 sudo pacman -Sy archlinuxcn-keyring yay git base-devel
 yay -S opencode-bin
 
-# 2. 安装 Clash Verge（用 GUI 配置订阅节点）
+# 2. 安装 Clash Verge + 启动代理（配置订阅后生效）
 yay -S clash-verge-rev-bin
-# 打开 Clash Verge → 订阅 → 添加 URL（见 network/clash/profiles.yaml）
-# 配置完成后代理自动生效
+# 订阅链接：https://feed.iggv5.com/c/714a8058-614e-4068-965a-682d2263d5b2/platform/clash/iGG-iGuge
+# 打开 Clash Verge GUI → 订阅 → 添加上述 URL → 切换到可用节点
+# 配置完成后启动服务（代理立即可用）：
+sudo systemctl enable --now clash-verge-service.service
 
-# 3. 克隆仓库
+# 3. 克隆仓库（走代理，GitHub 可访问）
 git clone https://github.com/FeiSaMa/arch-linux-config ~/refs/arch-linux-config
 
 # 4. 启动 opencode，告诉他：
@@ -78,7 +80,7 @@ ls ~/.config/opencode/opencode.jsonc ~/.config/opencode/instructions/system.md
 
 - `pacman` 失败：检查网络连接和镜像源
 - 重启 opencode 使新配置生效
-- 从 TTY 启动 opencode 时，`HTTP_PROXY` 环境变量可能未继承。AI 检测到 GitHub 访问失败时应提示用户设置代理，或检查 `clash-verge-service` 是否运行
+- 检测到 GitHub 访问失败时，检查 `clash-verge-service.service` 是否已启动且订阅已配置
 
 ---
 
@@ -408,7 +410,7 @@ echo $SHELL  # → /usr/bin/zsh
 
 目标：恢复 GNOME 桌面设置、扩展、壁纸。
 
-**时机：** 因为用户已在步骤 2 手动安装并登录 GNOME（或在 Phase 1 安装后重启进入 GNOME），此阶段可以直接执行。
+**时机：** GNOME 已在运行（用户步骤 2 手动安装并登录），此阶段可以直接执行。
 
 参考文档：`desktop/gnome-settings.md`
 

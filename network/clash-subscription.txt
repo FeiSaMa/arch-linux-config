@@ -1,0 +1,5 @@
+# Clash Verge 订阅链接
+# 用于首次配置代理。将此 URL 添加到 Clash Verge → 订阅 → 添加
+# 添加后切换到可用节点组，代理即刻生效
+
+https://feed.iggv5.com/c/714a8058-614e-4068-965a-682d2263d5b2/platform/clash/iGG-iGuge
