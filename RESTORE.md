@@ -7,10 +7,15 @@
 ## 使用方式
 
 ```bash
-# 1. 克隆本仓库
+# 1. 一键安装 yay + opencode（依托 archlinuxcn 源）
+echo -e "\n[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" | sudo tee -a /etc/pacman.conf
+sudo pacman -Sy archlinuxcn-keyring yay git base-devel
+yay -S opencode-bin
+
+# 2. 克隆本仓库
 git clone https://github.com/FeiSaMa/arch-linux-config ~/refs/arch-linux-config
 
-# 2. 启动 opencode，告诉他：
+# 3. 启动 opencode，告诉他：
 #    "根据 ~/refs/arch-linux-config/RESTORE.md 恢复我的系统"
 opencode
 ```

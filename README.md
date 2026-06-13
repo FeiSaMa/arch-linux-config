@@ -7,9 +7,9 @@
 ## 快速恢复
 
 ```bash
-# 1. 安装前提
-sudo pacman -Sy git base-devel
-git clone https://aur.archlinux.org/yay.git /tmp/yay && cd /tmp/yay && makepkg -si
+# 1. 安装前提（添加 archlinuxcn 源 → 安装 yay + opencode）
+echo -e "\n[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" | sudo tee -a /etc/pacman.conf
+sudo pacman -Sy archlinuxcn-keyring yay git base-devel
 yay -S opencode-bin
 
 # 2. 克隆配置
