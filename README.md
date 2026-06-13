@@ -49,5 +49,6 @@ opencode
 ├── desktop/         → 桌面配置文档
 ├── network/         → 网络与安全
 ├── scripts/         → 自定义脚本
-└── hardware/        → 硬件调优记录
+├── hardware/        → 硬件调优记录
+└── router/          → 第二台 ThinkPad 软路由配置
 ```
