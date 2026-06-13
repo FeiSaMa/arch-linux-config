@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+"""ThinkPad Router — 实时网络请求监视器"""
+import curses, json, time, os, urllib.request, struct, socket
+
+CONFIG = os.path.expanduser("~/.local/share/io.github.clash-verge-rev.clash-verge-rev")
+SECRET = open(f"{CONFIG}/config.yaml").read().split("secret: ")[1].split("\n")[0]
+AUTH = f"Authorization: Bearer {SECRET}"
+API = "http://127.0.0.1:9097"
+
+def api(path):
+    req = urllib.request.Request(f"{API}{path}", headers={"Authorization": f"Bearer {SECRET}"})
+    try: return json.loads(urllib.request.urlopen(req, timeout=2).read())
+    except: return {}
+
+def fmt_bytes(b):
+    for u in ("B", "KB", "MB", "GB"):
+        if abs(b) < 1024: return f"{b:.1f}{u}"
+        b /= 1024
+    return f"{b:.1f}TB"
+
+def fmt_time(ms):
+    s = ms / 1000
+    if s < 60: return f"{s:.0f}s"
+    m, s = divmod(s, 60)
+    return f"{m:.0f}m{s:.0f}s"
+
+def main(stdscr):
+    curses.curs_set(0)
+    curses.start_color()
+    curses.init_pair(1, curses.COLOR_GREEN, -1)   # 直连
+    curses.init_pair(2, curses.COLOR_YELLOW, -1)  # 代理
+    curses.init_pair(3, curses.COLOR_RED, -1)     # 拒绝
+    curses.init_pair(4, curses.COLOR_CYAN, -1)    # 标题
+    curses.init_pair(5, curses.COLOR_MAGENTA, -1) # 边框
+    curses.init_pair(6, curses.COLOR_WHITE, -1)   # 普通
+
+    prev = set()
+    while True:
+        stdscr.erase()
+        h, w = stdscr.getmaxyx()
+        data = api("/connections")
+        conns = data.get("connections", [])
+        now = {c["id"] for c in conns}
+        new_conns = [c for c in conns if c["id"] in now - prev]
+        prev = now
+
+        total_up = sum(c.get("upload", 0) for c in conns)
+        total_down = sum(c.get("download", 0) for c in conns)
+
+        # 标题栏
+        stdscr.attron(curses.color_pair(5) | curses.A_BOLD)
+        title = f" ThinkPad Router — 实时网络请求 "
+        stdscr.addstr(0, max(0, (w - len(title)) // 2), title)
+        stdscr.attroff(curses.color_pair(5) | curses.A_BOLD)
+
+        # 统计信息
+        stdscr.attron(curses.color_pair(4))
+        stats = f"  活跃: {len(conns)}  |  ↑ {fmt_bytes(total_up)}  |  ↓ {fmt_bytes(total_down)}  |  {time.strftime('%H:%M:%S')}"
+        stdscr.addstr(1, 2, stats)
+        stdscr.attroff(curses.color_pair(4))
+
+        # 分隔线
+        stdscr.attron(curses.color_pair(5))
+        sep = "─" * (w - 2)
+        stdscr.addstr(2, 0, " " + sep)
+        stdscr.attroff(curses.color_pair(5))
+
+        # 表头
+        if h > 3:
+            head = f"{'主机':<28} {'目标':<22} {'代理':<18} {'流量':<8} {'耗时':<6}"
+            stdscr.attron(curses.A_DIM)
+            stdscr.addstr(3, 2, head[:w-4])
+            stdscr.attroff(curses.A_DIM)
+
+        # 连接列表
+        y = 4
+        for c in conns[:h-6]:
+            meta = c.get("metadata", {})
+            host = meta.get("host", "") or meta.get("destinationIP", "")
+            dst_port = meta.get("destinationPort", "?")
+            dst_ip = meta.get("destinationIP", "?")
+            dst = f"{dst_ip}:{dst_port}"
+            chains = c.get("chains", ["?"])
+            chain = chains[0] if chains else "?"
+            down = c.get("download", 0) + c.get("upload", 0)
+            delay = c.get("start", 0)
+            elapsed = int((time.time() * 1000) - delay) if delay else 0
+
+            # 代理类型颜色
+            if chain in ("DIRECT", "Direct", "直连"):
+                pair = 1
+            elif chain in ("REJECT", "Reject", "阻断"):
+                pair = 3
+            else:
+                pair = 2
+
+            line = f"{host[:27]:<28} {dst[:21]:<22} "
+            stdscr.addstr(y, 2, line[:50])
+
+            stdscr.attron(curses.color_pair(pair) | curses.A_BOLD)
+            stdscr.addstr(f"{chain[:17]:<18}")
+            stdscr.attroff(curses.color_pair(pair) | curses.A_BOLD)
+
+            stdscr.addstr(f" {fmt_bytes(down):<8} {fmt_time(elapsed):<6}")
+
+            y += 1
+            if y >= h - 1:
+                break
+
+        # 底部
+        if h > 2:
+            stdscr.attron(curses.color_pair(5))
+            stdscr.addstr(h-2, 0, " " + sep)
+            stdscr.attroff(curses.color_pair(5))
+            hint = " Q 退出  |  自动刷新 2s"
+            stdscr.attron(curses.A_DIM)
+            stdscr.addstr(h-1, max(0, (w - len(hint)) // 2), hint)
+            stdscr.attroff(curses.A_DIM)
+
+        stdscr.refresh()
+        time.sleep(2)
+
+curses.wrapper(main)
