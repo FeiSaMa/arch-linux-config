@@ -506,6 +506,9 @@ fi
 ```
 
 ```bash
+# 确保 /boot/grub → /efi/grub symlink 存在（Shorin 指南的配置）
+sudo ln -sf /efi/grub /boot/grub 2>/dev/null || true
+
 # 设置 GRUB 内核参数（仅添加不存在的参数，避免重复）
 CURRENT=$(grep -oP '^GRUB_CMDLINE_LINUX_DEFAULT="\K[^"]*' /etc/default/grub 2>/dev/null)
 for param in mitigations=off zswap.enabled=0 nmi_watchdog=0; do
