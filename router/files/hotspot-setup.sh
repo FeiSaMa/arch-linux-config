@@ -39,3 +39,6 @@ iptables-restore < /etc/iptables/iptables.rules 2>/dev/null || true
 sleep 3
 SECRET=$(grep "^secret:" /home/feisama/.local/share/io.github.clash-verge-rev.clash-verge-rev/config.yaml | awk "{print \$2}")
 curl -s -X PUT http://127.0.0.1:9097/configs   -H "Authorization: Bearer $SECRET"   -H "Content-Type: application/json" -d "{}" > /dev/null 2>&1 || true
+
+# 生成 Clash 完整配置（含订阅节点）
+python3 /home/feisama/.local/share/io.github.clash-verge-rev.clash-verge-rev/gen-config.py 2>/dev/null || true
