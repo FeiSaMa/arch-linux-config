@@ -18,10 +18,10 @@
 - 默认启动项：`saved`（记住上次选择）
 - 超时：5 秒（`GRUB_TIMEOUT=5`）
 - 分辨率：1920x1200（`GRUB_GFXMODE=1920x1200`）
+- 语言：`GRUB_LANGCODE=en_US`（英文，通过修改 `/etc/grub.d/00_header` 和 `/usr/bin/grub-mkconfig` 使该变量生效）
 - 字体：`GRUB_FONT=/boot/grub/fonts/ter-u32n-32.pf2`
 - 主题：`/usr/share/grub/themes/catppuccin-macchiato-grub-theme/theme.txt`
-- 主题字体：JetBrains Mono Regular 20（由 `grub-mkfont` 从 `JetBrainsMono-Regular.ttf` 生成）
-- GRUB 终端字体与菜单字体：`ter-u32n-32.pf2`（由 `grub-mkfont` 从 `ter-u32n.otb` 生成，Terminus 等宽字体 32px）
+- 主题字体：`ter-u32n-32.pf2`（Terminus 等宽字体 32px，替换了原 JetBrains Mono）
 - 检测 Windows Boot Manager（`os-prober` 启用）
 - 快照启动支持：`grub-btrfsd` + snapper
 
