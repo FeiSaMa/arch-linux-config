@@ -1,51 +1,36 @@
 # AI 恢复手册
 
-> 在刚装好的 Arch Linux 上通过 opencode 一键恢复系统。
+> 在已安装 GNOME 桌面的 Arch Linux 上通过 opencode 一键恢复全部配置。
 >
-> **前提：** 已按 [Shorin ArchLinux 安装指南 → 手动安装](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) 完成系统安装，创建 snapper #23 快照 "before desktop"
+> **完整流程：**
 >
-> **起始状态：** snapper #23 "before desktop" 快照点
-> - ✅ Arch base + 网络 + pacman
-> - ✅ Btrfs 子卷（@, @home）+ snapper + GRUB（ESP 在 /efi）
-> - ✅ NetworkManager + zram-generator + locale/时区/主机名/普通用户
-> - ❌ 无桌面环境（Phase 4 需登录 GNOME 后执行）
+> | 步骤 | 内容 |
+> |------|------|
+> | 1 | [Shorin ArchLinux → 手动安装](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) |
+> | 2 | 安装 GNOME 桌面（手动，pacman 走国内镜像） |
+> | 3 | 创建 snapshot（如 "after GNOME"） |
+> | 4 | **从这里开始 — 以下用 opencode 恢复** |
 >
-> **注意：** 指南中已配置的项（GRUB、zram、locale 等）会被本流程安全覆盖/合并。`pacman -S --needed` 保证不会重复安装。
->
-> **注意：** 本配置针对 ThinkPad T14 Gen 7 (Intel Core Ultra 7 356H)。如果目标机器硬件不同，\n\
-> Phase 5（硬件调优）中的 thinkfan、RAPL 功率限制、GPU min_freq 等参数需要重新适配。
+> **起始状态：**
+> - ✅ Arch base + Btrfs + GRUB + NetworkManager + zram + locale/时区/用户
+> - ✅ GNOME 桌面 + gdm（已登录 GNOME）
+> - ❌ 未安装 yay / opencode / Clash
+> - ❌ 无 dotfiles / 硬件调优 / 其他配置
 
 ## 使用方式
 
 ```bash
-# 1. 安装前提（添加 archlinuxcn 源）
+# 1. 添加 archlinuxcn 源 + 安装 yay 和 opencode
 echo -e "\n[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" | sudo tee -a /etc/pacman.conf
-# 初始化 pacman keyring（新机器必需，否则 archlinuxcn-keyring 安装会失败）
-sudo pacman-key --init 2>/dev/null || true
-sudo pacman-key --populate archlinux 2>/dev/null || true
 sudo pacman -Sy archlinuxcn-keyring yay git base-devel
-
-# 2. 安装 Clash Verge 代理核心（CLI 守护进程，无需桌面）
-yay -S clash-verge-rev-bin
-
-# 2a. 恢复 Clash 配置（含订阅链接、节点分组、规则等）
-#     仓库备份：network/clash/（已排除节点数据，首次需从订阅 URL 下载）
-mkdir -p ~/.local/share/io.github.clash-verge-rev.clash-verge-rev
-cp ~/refs/arch-linux-config/network/clash/verge.yaml ~/.local/share/io.github.clash-verge-rev.clash-verge-rev/
-cp ~/refs/arch-linux-config/network/clash/profiles.yaml ~/.local/share/io.github.clash-verge-rev.clash-verge-rev/
-cp ~/refs/arch-linux-config/network/clash/config.yaml ~/.local/share/io.github.clash-verge-rev.clash-verge-rev/
-cp ~/refs/arch-linux-config/network/clash/dns_config.yaml ~/.local/share/io.github.clash-verge-rev.clash-verge-rev/
-mkdir -p ~/.local/share/io.github.clash-verge-rev.clash-verge-rev/profiles
-cp ~/refs/arch-linux-config/network/clash/profiles/* ~/.local/share/io.github.clash-verge-rev.clash-verge-rev/profiles/
-
-sudo systemctl enable --now clash-verge-service.service
-
-# 2b. 设置代理环境变量（clash 默认 HTTP 代理端口 7890）
-export HTTP_PROXY=http://127.0.0.1:7890
-export HTTPS_PROXY=http://127.0.0.1:7890
-
-# 3. 安装 opencode + 克隆配置（现在走代理，GitHub 可访问）
 yay -S opencode-bin
+
+# 2. 安装 Clash Verge（用 GUI 配置订阅节点）
+yay -S clash-verge-rev-bin
+# 打开 Clash Verge → 订阅 → 添加 URL（见 network/clash/profiles.yaml）
+# 配置完成后代理自动生效
+
+# 3. 克隆仓库
 git clone https://github.com/FeiSaMa/arch-linux-config ~/refs/arch-linux-config
 
 # 4. 启动 opencode，告诉他：
@@ -105,7 +90,7 @@ ls ~/.config/opencode/opencode.jsonc ~/.config/opencode/instructions/system.md
 
 ### AI 执行
 
-**官方包：**
+**官方包（注意：GNOME 包已由用户在步骤 2 手动安装，`--needed` 会自动跳过）：**
 
 ```bash
 # Core/系统
@@ -423,19 +408,13 @@ echo $SHELL  # → /usr/bin/zsh
 
 目标：恢复 GNOME 桌面设置、扩展、壁纸。
 
-**时机：** 此阶段需要 GNOME 会话环境。如果当前在 TTY 中（snap #23 场景），请跳过本阶段，完成 Phase 5-6 后重启登录 GNOME，再回来执行。
+**时机：** 因为用户已在步骤 2 手动安装并登录 GNOME（或在 Phase 1 安装后重启进入 GNOME），此阶段可以直接执行。
 
 参考文档：`desktop/gnome-settings.md`
 
 ### AI 执行
 
 ```bash
-# 检测 GNOME 是否正在运行
-if ! pgrep -x gnome-shell >/dev/null 2>&1; then
-  echo "GNOME 未运行，跳过 Phase 4。请完成 Phase 5-6 → reboot → 登录 GNOME 后再运行。"
-  exit 0
-fi
-
 # 恢复 dconf 设置（含快捷键、主题、扩展配置等所有 GNOME 设置）
 # 替换 dconf 中硬编码的旧用户名 /home/feisama/ → /home/$USER/
 sed "s|/home/feisama/|/home/$USER/|g" ~/refs/arch-linux-config/gnome/dconf.conf | \
@@ -665,24 +644,14 @@ sudo -u "$USER" GSETTINGS_BACKEND=memory dbus-launch gsettings get org.gnome.she
 
 ## 恢复后的收尾
 
-### 重启进入 GNOME
+### 验证清单
 
 ```bash
+# 如果 Phase 7 验证都通过，重启确认所有服务正常运行
 sudo reboot
 ```
 
-### 登录后完成 Phase 4（GNOME 恢复）
-
-如果 Phase 4 在 TTY 中被跳过（snap #23 场景），登录 GNOME 后：
-
-```bash
-# 重新启动 opencode，告诉他：
-# "继续完成 ~/refs/arch-linux-config/RESTORE.md 中的 Phase 4"
-opencode
-```
-
-### 验证清单
-
+登录后验证：
 - 切换 PPD 模式检查硬件联动
 - Fcitx5 输入法 (Super+Space)
 - Ghostty 终端 (Catppuccin 主题)

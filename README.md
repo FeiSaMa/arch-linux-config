@@ -9,38 +9,25 @@
 | 步骤 | 内容 | 参考 |
 |------|------|------|
 | 1 | 手动安装 Arch Linux（Btrfs + GRUB + 基础配置） | [Shorin ArchLinux → 手动安装](https://github.com/SHORiN-KiWATA/Shorin-ArchLinux-Guide/wiki/%E5%AE%89%E8%A3%85ArchLinux#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85) |
-| 2 | 创建 snapper #23 快照 "before desktop" | — |
-| 3 | 安装 Clash Verge 代理核心 + 配置代理（国内网络必需） | 见下方 |
-| 4 | **从这里开始用 opencode 恢复** | `RESTORE.md` |
+| 2 | 手动安装 GNOME 桌面（`pacman -S gnome-desktop gnome-shell gdm` → `reboot`） | — |
+| 3 | 安装 opencode + Clash + 克隆仓库 | 见下方 |
+| 4 | **opencode 自动恢复**（Phase 0-7） | `RESTORE.md` |
 
 ## 快速恢复
 
 ```bash
-# 1. 安装前提（添加 archlinuxcn 源）
+# 1. 添加 archlinuxcn 源 + 安装 yay opencode clash（国内镜像走 archlinuxcn）
 echo -e "\n[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" | sudo tee -a /etc/pacman.conf
-# 初始化 pacman keyring（新机器必需）
-sudo pacman-key --init 2>/dev/null || true
-sudo pacman-key --populate archlinux 2>/dev/null || true
 sudo pacman -Sy archlinuxcn-keyring yay git base-devel
+yay -S opencode-bin clash-verge-rev-bin
 
-# 2. 安装 Clash Verge 代理核心（CLI 守护进程，无需桌面）
-#    archlinuxcn 有预编译包，无需翻墙
-yay -S clash-verge-rev-bin
+# 2. 配置 Clash 订阅（打开 Clash Verge GUI → 订阅 → 添加 URL）
+#    订阅链接见克隆后的仓库: refs/arch-linux-config/network/clash/profiles.yaml
 
-# 2a. 恢复 Clash 配置（仓库已备份，含订阅链接、分组、规则）
-#     opencode 启动后会自动执行，也可以手动复制：
-#     cp ~/refs/arch-linux-config/network/clash/* ~/.local/share/io.github.clash-verge-rev.clash-verge-rev/
-sudo systemctl enable --now clash-verge-service.service
-
-# 3. 设置代理环境变量（clash 默认 HTTP 代理端口 7890）
-export HTTP_PROXY=http://127.0.0.1:7890
-export HTTPS_PROXY=http://127.0.0.1:7890
-
-# 4. 安装 opencode + 克隆配置
-yay -S opencode-bin
+# 3. 克隆仓库
 git clone https://github.com/FeiSaMa/arch-linux-config ~/refs/arch-linux-config
 
-# 5. 启动 opencode，告诉它：
+# 4. 启动 opencode，告诉它：
 #    "根据 ~/refs/arch-linux-config/RESTORE.md 恢复我的系统"
 opencode
 ```
