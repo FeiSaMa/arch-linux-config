@@ -35,7 +35,9 @@ After=network-online.target
 [Service]
 Type=simple
 ExecStart=/usr/bin/clash-verge-service
-Group=feisama
+# 新机器上如需限定用户，取消注释并替换：
+# User=YOUR_USERNAME
+# Group=YOUR_USERNAME
 Restart=always
 RestartSec=5
 

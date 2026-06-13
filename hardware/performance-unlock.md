@@ -1,5 +1,8 @@
 # ThinkPad 性能释放调优记录
 
+> **历史文档：** 本文记录的是最初调优的全过程，包含原始脚本和内嵌的命令。
+> **当前可执行版本见：** `files/usr/local/bin/ppd-power-tune.sh`（含 CAFFEINE_USER 环境变量支持）
+
 日期: 2026-06-11
 主机: ThinkPad / Arch Linux / Intel Core Ultra 7 356H / 内核 7.0.11-zen
 

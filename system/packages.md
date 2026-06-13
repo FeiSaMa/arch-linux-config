@@ -98,6 +98,9 @@ sudo pacman -S --needed fastfetch yazi
 sudo pacman -S --needed flatpak
 sudo pacman -S --needed exfat-utils
 
+# 注：lib32 包需要 multilib 仓库已启用（pacman.conf 中取消注释 [multilib]）
+# 如果尚未启用，先执行 sudo sed -i '/\[multilib\]/,/Include/s/^#//' /etc/pacman.conf
+
 # 图形驱动
 sudo pacman -S --needed vulkan-intel vulkan-icd-loader vulkan-tools
 sudo pacman -S --needed lib32-vulkan-intel lib32-vulkan-icd-loader
@@ -114,9 +117,7 @@ sudo pacman -S --needed fcitx5 fcitx5-rime fcitx5-gtk fcitx5-qt fcitx5-configtoo
 sudo pacman -S --needed zsh zsh-autosuggestions zsh-completions zsh-syntax-highlighting
 sudo pacman -S --needed zsh-theme-powerlevel10k-git
 
-# AUR 助手
-sudo pacman -S --needed yay paru
-sudo pacman -S --needed archlinuxcn-keyring
+# 注：yay 和 archlinuxcn-keyring 已在 bootstrap 中安装，此处不重复
 
 # 开发
 sudo pacman -S --needed base-devel inotify-tools

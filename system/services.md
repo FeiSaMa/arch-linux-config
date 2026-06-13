@@ -40,11 +40,12 @@ pipewire.socket
 ### 系统服务
 
 ```bash
-sudo systemctl enable gdm.service
-sudo systemctl enable NetworkManager.service
+sudo systemctl enable --now NetworkManager.service
+sudo systemctl enable --now bluetooth.service
+sudo systemctl enable --now power-profiles-daemon.service
 sudo systemctl enable NetworkManager-wait-online.service
-sudo systemctl enable bluetooth.service
-sudo systemctl enable power-profiles-daemon.service
+sudo systemctl enable NetworkManager-dispatcher.service
+sudo systemctl enable gdm.service
 sudo systemctl enable ufw.service
 sudo systemctl enable thinkfan.service thinkfan-sleep.service thinkfan-wakeup.service
 sudo systemctl enable grub-btrfsd.service

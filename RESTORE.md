@@ -3,6 +3,9 @@
 > 在刚装好的 Arch Linux 上通过 opencode 一键恢复系统。
 >
 > **前提：** Arch base 已安装、已联网、已有普通用户、已安装 `git` + `yay` + `opencode-bin`
+>
+> **注意：** 本配置针对 ThinkPad T14 Gen 7 (Intel Core Ultra 7 356H)。如果目标机器硬件不同，\n\
+> Phase 5（硬件调优）中的 thinkfan、RAPL 功率限制、GPU min_freq 等参数需要重新适配。
 
 ## 使用方式
 
@@ -104,6 +107,9 @@ sudo pacman -S --needed fastfetch yazi
 sudo pacman -S --needed flatpak
 sudo pacman -S --needed exfat-utils
 
+# 注：lib32 包需要 multilib 仓库已启用
+# 如果尚未启用，先恢复 pacman.conf（见 Phase 2）或手动取消注释 /etc/pacman.conf 中的 [multilib]
+
 # 图形驱动 (Intel)
 sudo pacman -S --needed vulkan-intel vulkan-icd-loader vulkan-tools
 sudo pacman -S --needed lib32-vulkan-intel lib32-vulkan-icd-loader
@@ -120,9 +126,7 @@ sudo pacman -S --needed fcitx5 fcitx5-rime fcitx5-gtk fcitx5-qt fcitx5-configtoo
 sudo pacman -S --needed zsh zsh-autosuggestions zsh-completions zsh-syntax-highlighting
 sudo pacman -S --needed zsh-theme-powerlevel10k-git
 
-# AUR 助手
-sudo pacman -S --needed yay paru
-sudo pacman -S --needed archlinuxcn-keyring
+# 注：yay 和 archlinuxcn-keyring 已在 bootstrap 中安装
 
 # 开发
 sudo pacman -S --needed base-devel inotify-tools
@@ -201,8 +205,13 @@ AI 从 `files/etc/pacman.conf` 读取内容并写入 `/etc/pacman.conf`
 AI 从 `files/etc/locale.conf` 读取内容并写入 `/etc/locale.conf`
 AI 从 `files/etc/hostname` 读取内容并写入 `/etc/hostname`
 AI 从 `files/etc/adjtime` 读取内容并写入 `/etc/adjtime`
+（注：adjtime 含旧机器的时间戳，AI 也可选择不复制，改用 `hwclock --systohc --utc` 生成新值）
 
 ```bash
+# 生成 locale（如果尚未生成）
+sudo sed -i 's/#zh_CN.UTF-8/zh_CN.UTF-8/' /etc/locale.gen 2>/dev/null || true
+sudo locale-gen
+
 # 区域设置
 sudo localectl set-locale LANG=zh_CN.UTF-8
 sudo hostnamectl hostname ThinkPad
@@ -266,7 +275,7 @@ AI 从 `home/.local/share/fcitx5/rime/default.custom.yaml` 读取内容并写入
 git clone https://github.com/LazyVim/starter ~/.config/nvim
 
 # 切换默认 shell 到 zsh
-chsh -s /usr/bin/zsh
+sudo chsh -s /usr/bin/zsh "$USER"
 ```
 
 ### 验证
@@ -293,7 +302,9 @@ echo $SHELL  # → /usr/bin/zsh
 
 ```bash
 # 恢复 dconf 设置（含快捷键、主题、扩展配置等所有 GNOME 设置）
-dconf load / < ~/refs/arch-linux-config/gnome/dconf.conf
+# 注：dconf load 需要 GNOME 会话环境，如果在 TTY 下执行会失败
+# 可暂缓此步，登录 GNOME 后再运行
+dconf load / < ~/refs/arch-linux-config/gnome/dconf.conf 2>/dev/null || echo "dconf 未执行（无 GNOME 会话），登录后再运行"
 
 # 安装 GNOME Shell 扩展
 bash ~/refs/arch-linux-config/gnome/extensions.sh
@@ -340,11 +351,20 @@ sudo cp ~/refs/arch-linux-config/files/usr/local/bin/ppd-power-tune.sh \
   /usr/local/bin/
 sudo chmod +x /usr/local/bin/ppd-power-tune.sh
 
+# 设置 CAFFEINE_USER 环境变量（Caffeine 联动需要）
+# 替换为实际用户名
+# sudo sh -c 'echo "CAFFEINE_USER=$(whoami)" > /etc/ppd-power-tune.conf'
+
 # 复制 systemd 服务文件（由 AI 从 files/etc/ 读取写入）
 # 已包含：thinkfan.conf, modprobe.d/99-thinkfan.conf, thinkfan 配置
 
 # 重载 systemd
 sudo systemctl daemon-reload
+
+# 重载 thinkpad_acpi 模块使 fan_control=1 在当前会话生效
+# （initramfs 重建后重启才能自动生效，当前会话需手动重载）
+sudo modprobe -r thinkpad_acpi 2>/dev/null || true
+sudo modprobe thinkpad_acpi
 
 # 启动服务
 sudo systemctl start thinkfan
@@ -356,8 +376,9 @@ cat /sys/module/thinkpad_acpi/parameters/fan_control  # 应为 Y
 
 ```bash
 # 设置 GRUB 内核参数（mitigations=off 等）
-# 注：需要在新机器上手动将 GRUB_CMDLINE_LINUX_DEFAULT 追加到 /etc/default/grub
-# AI 读取 system/kernel-boot.md 中的 GRUB 配置
+# 追加参数到 GRUB_CMDLINE_LINUX_DEFAULT
+sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& mitigations=off zswap.enabled=0 nmi_watchdog=0/' /etc/default/grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
 ### 验证
@@ -383,19 +404,21 @@ cat /sys/module/thinkpad_acpi/parameters/fan_control       # → Y
 ### AI 执行
 
 ```bash
-# 系统服务
-sudo systemctl enable gdm.service
-sudo systemctl enable NetworkManager.service
+# 系统服务（关键服务使用 enable --now 立即启动）
+sudo systemctl enable --now NetworkManager.service
+sudo systemctl enable --now bluetooth.service
+sudo systemctl enable --now power-profiles-daemon.service
 sudo systemctl enable NetworkManager-wait-online.service
-sudo systemctl enable bluetooth.service
-sudo systemctl enable power-profiles-daemon.service
+sudo systemctl enable NetworkManager-dispatcher.service
+sudo systemctl enable gdm.service
 sudo systemctl enable ufw.service
 sudo systemctl enable thinkfan.service thinkfan-sleep.service thinkfan-wakeup.service
 sudo systemctl enable grub-btrfsd.service
 sudo systemctl enable ppd-profile-monitor.service
 sudo systemctl enable clash-verge-service.service
 
-# 用户服务
+# 用户服务（需以普通用户身份执行，非 sudo）
+# 如果当前是 root，先切换到用户 su - $USER
 systemctl --user enable pipewire.service
 systemctl --user enable pipewire-pulse.service
 systemctl --user enable wireplumber.service
@@ -466,7 +489,7 @@ echo "=== 7. 无 pacnew 残留 ==="
 find /etc -name "*.pacnew" 2>/dev/null
 
 echo "=== 8. Caffeine 联动 ==="
-systemd-run --user -P gsettings get org.gnome.shell.extensions.caffeine cli-toggle 2>/dev/null || echo "需登录 GNOME 后验证"
+sudo -u "$USER" GSETTINGS_BACKEND=memory dbus-launch gsettings get org.gnome.shell.extensions.caffeine cli-toggle 2>/dev/null || echo "需登录 GNOME 后验证"
 ```
 
 ### 验证通过标准

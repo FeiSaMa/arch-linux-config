@@ -54,6 +54,6 @@ ls /etc/pacman.d/hooks/
 find /etc -name "*.pacnew" 2>/dev/null
 
 # Caffeine 联动
-systemd-run --user -M feisama@ -P gsettings get org.gnome.shell.extensions.caffeine cli-toggle
+sudo -u "$USER" GSETTINGS_BACKEND=memory dbus-launch gsettings get org.gnome.shell.extensions.caffeine cli-toggle 2>/dev/null || echo "需登录 GNOME 后验证"
 journalctl -u ppd-profile-monitor.service | grep -i caffeine | tail -5
 ```

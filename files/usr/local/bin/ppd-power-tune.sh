@@ -9,7 +9,9 @@ VM_DIRTY="/proc/sys/vm/dirty_ratio"
 VM_DIRTY_BG="/proc/sys/vm/dirty_background_ratio"
 VM_CACHE="/proc/sys/vm/vfs_cache_pressure"
 
-CAFFEINE_USER="feisama"
+# Caffeine 联动需要知道实际用户名（daemon 以 root 运行，需切换用户访问 GNOME 会话）
+# 新机器上会从 CAFFEINE_USER 环境变量或自动检测获取
+CAFFEINE_USER="${CAFFEINE_USER:-$(logname 2>/dev/null || echo feisama)}"
 
 PKG_DOMAINS=()
 PSYS_DOMAINS=()
@@ -88,9 +90,9 @@ set_sched() {
 set_caffeine() {
     local state="$1"
     local current
-    current=$(systemd-run --user -M 'feisama@' -P gsettings get org.gnome.shell.extensions.caffeine cli-toggle 2>/dev/null || echo "false")
+    current=$(systemd-run --user -M "${CAFFEINE_USER}@" -P gsettings get org.gnome.shell.extensions.caffeine cli-toggle 2>/dev/null || echo "false")
     if [ "$current" != "$state" ]; then
-        systemd-run --user -M 'feisama@' -P gsettings set org.gnome.shell.extensions.caffeine cli-toggle "$state"
+        systemd-run --user -M "${CAFFEINE_USER}@" -P gsettings set org.gnome.shell.extensions.caffeine cli-toggle "$state"
     fi
 }
 
