@@ -133,16 +133,20 @@ def run():
 
             R.append(pad("─"*W,W))                                             # 22
             R.append(pad(f"UP {fs(us)} DN {fs(ds)}",W))                       # 23
-
-            # --- RENDER ---
-            sys.stdout.write("\033[2J\033[H")
-            for i in range(min(len(L),len(R),ROWS)):
-                lp=L[i] if i<len(L) else " "*W
-                rp=R[i] if i<len(R) else " "*W
-                sys.stdout.write(f"{pad(lp,W)} {pad(rp,W)}\n")
-            # fill remaining rows
-            for i in range(max(len(L),len(R)), ROWS):
-                sys.stdout.write(" "*(2*W+1)+"\n")
+            # --- RENDER (last row no newline to prevent scroll) ---
+            out = "033[2J033[H"
+            for i in range(ROWS - 1):
+                lp = L[i] if i < len(L) else " "*W
+                rp = R[i] if i < len(R) else " "*W
+                out += f"{pad(lp,W)} {pad(rp,W)}\n"
+            i = ROWS - 1
+            lp = L[i] if i < len(L) else " "*W
+            rp = R[i] if i < len(R) else " "*W
+            out += f"{pad(lp,W)} {pad(rp,W)}"
+            sys.stdout.write(out)
+            sys.stdout.flush()
+            out += f"{pad(lp,W)} {pad(rp,W)}"
+            sys.stdout.write(out)
             sys.stdout.flush()
             time.sleep(FPS)
 
