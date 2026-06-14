@@ -158,9 +158,9 @@ def run(stdscr):
             row+=1
 
             stdscr.addstr(row,1,f"CONNS ({len(sc)}):",fp)
-            stdscr.addstr(row, 4, "DEST", fp)
-            stdscr.addstr(row, 30, "DOWN", fp)
-            stdscr.addstr(row, 39, "UP", fp)
+            row+=1
+            # Column headers aligned to data columns
+            stdscr.addstr(row,4,f"{'DEST'.ljust(22)} {'DOWN'.rjust(8)} {'UP'.rjust(8)}",fp)
             row+=1
             # draw connections (max 16, stop before legend row)
             max_conn_row = H - 5
