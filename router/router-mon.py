@@ -96,7 +96,7 @@ def run(stdscr):
 
             # Top bar
             stdscr.addstr(0,0," T14 ROUTER MONITOR",curses.A_BOLD)
-            stdscr.addstr(0,MW," SYSTEM",curses.A_BOLD)
+            stdscr.addstr(0,MW," Arch Linux",curses.A_BOLD)
             stdscr.addstr(0,W-9,ts)
 
             # Column dividers
@@ -149,9 +149,21 @@ def run(stdscr):
                 stdscr.addstr(row,10,"D=Direct",curses.color_pair(2))
                 stdscr.addstr(row,20,"R=Reject",curses.color_pair(1))
 
-            # RIGHT PANEL — fastfetch
-            rr=2
-            shown=0
+            # RIGHT PANEL — Arch logo + fastfetch
+            ARCH_LOGO = [
+                "     /\\",
+                "    /  \\",
+                "   /    \\",
+                "  /      \\",
+                " /________\\",
+            ]
+            rr = 2
+            for logo_line in ARCH_LOGO:
+                if rr < H-1:
+                    stdscr.addstr(rr, MW+1, logo_line, curses.color_pair(6) | fp)
+                rr += 1
+            rr += 1  # blank line after logo
+            shown = 0
             for line in ff_lines:
                 if "feisama@router" in line: continue
                 if line.replace("-","")=="": continue
