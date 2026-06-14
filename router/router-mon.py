@@ -23,19 +23,17 @@ def get_conns():
 
 def get_proxies():
     d=api("/proxies")
-    if not d: return [], ""
+    if not d: return []
     px=d.get("proxies",{})
-    # Find URLTest group and its selected node
     for name,p in px.items():
         if p.get("type")=="URLTest":
             now=p.get("now","?")
-            # Get that node's delay from individual proxy entry
             dl="?"
             if now in px:
                 h=px[now].get("history",[])
                 dl=f"{h[-1].get('delay','?')}ms" if h else "?"
-            return [(now[:20],dl)], ""
-    return [], ""
+            return [(now[:20],dl)]
+    return []
 
 def fb(n):
     if not n or n<1024: return f"{n or 0}B"
@@ -205,6 +203,8 @@ def run(stdscr):
 
         except KeyboardInterrupt: break
         except Exception as e:
+            import traceback
+            open("/tmp/mon_crash.log","a").write(f"{traceback.format_exc()}\n")
             stdscr.addstr(H-1,1,f"ERROR: {e}"[:W-2],curses.color_pair(1))
             stdscr.refresh()
             time.sleep(2)
