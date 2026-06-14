@@ -86,14 +86,23 @@ set_sched() {
 case "${1:-}" in
     daemon)
         set_sched
-        set_limits "$(cat "$PROFILE" 2>/dev/null || echo "unknown")"
-        last_profile=""
+        start_ts=$SECONDS
+        while [ $((SECONDS - start_ts)) -lt 30 ]; do
+            profile=$(cat "$PROFILE" 2>/dev/null || echo "")
+            if [ -n "$profile" ]; then break; fi
+            sleep 2
+        done
+        set_limits "${profile:-unknown}"
+        last_profile="$profile"
+        counter=0
         while true; do
             sleep 10
+            counter=$((counter + 1))
             profile=$(cat "$PROFILE" 2>/dev/null || echo "unknown")
-            if [ "$profile" = "$last_profile" ]; then continue; fi
-            set_limits "$profile"
-            last_profile="$profile"
+            if [ "$profile" != "$last_profile" ] || [ $((counter % 30)) -eq 0 ]; then
+                set_limits "$profile"
+                last_profile="$profile"
+            fi
         done
         ;;
     apply)  set_limits "$(cat "$PROFILE")" ;;

@@ -1,5 +1,6 @@
 [Unit]
 Description=PPD Profile Power Limit Monitor
+After=multi-user.target
 
 [Service]
 Type=exec
