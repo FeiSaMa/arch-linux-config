@@ -170,7 +170,7 @@ def run(stdscr):
                 dl2=fs(ds2) if ds2>0 else "    -"; ul2=fs(us2) if us2>0 else "    -"
                 sym,clr_pair=rs(c.get("chains",[]))
                 stdscr.addstr(row,1,f" {sym} ",curses.color_pair(clr_pair)|fp)
-                stdscr.addstr(row,3,f"{(dst+':'+(port or ''))[:22].ljust(22)} {dl2:>8} {ul2:>8}")
+                stdscr.addstr(row,4,f"{(dst+':'+(port or ''))[:22].ljust(22)} {dl2:>8} {ul2:>8}")
                 row+=1
             # clear leftover connection rows from previous frame
             for y in range(row, max_conn_row):
