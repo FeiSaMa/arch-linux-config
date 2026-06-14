@@ -11,6 +11,16 @@
 | 监控脚本 | `/usr/local/bin/router-mon.py` | curses 全屏 TUI 主程序 |
 | systemd 服务 | `/etc/systemd/system/router-mon.service` | 开机在 tty2 自启 |
 | 控制台字体 | `/etc/vconsole.conf` | ter-132b（16×32px，120 列 × 33 行） |
+| WiFi IP 服务 | `/etc/systemd/system/wifi-lan-ip.service` | 分配 192.168.2.1/24 给 wlp0s20f3 |
+| nftables 防火墙 | `/etc/nftables.conf` | NAT + DNS redirect + Meta 转发 |
+| dnsmasq DHCP | `/etc/dnsmasq.conf` | LAN DHCP 192.168.2.50-200 |
+| hostapd WiFi | `/etc/hostapd/hostapd.conf` | WiFi AP 配置 |
+| Mihomo 代理 | `/etc/mihomo/config.yaml` | TUN 透明代理 + fake-ip DNS |
+| IP 转发 | `/etc/sysctl.d/99-ip-forward.conf` | net.ipv4.ip_forward=1 |
+| 合盖不休眠 | `/etc/systemd/logind.conf` | HandleLidSwitch=ignore |
+| 屏幕不熄灭 | `/etc/default/grub` | consoleblank=0 |
+| sudo 免密 | `/etc/sudoers.d/feisama` | feisama NOPASSWD: ALL |
+| NM unmanaged WiFi | `/etc/NetworkManager/conf.d/90-unmanaged-wifi.conf` | NM 不管 wlp0s20f3 |
 
 ## 关键依赖
 
@@ -84,3 +94,33 @@ tty2 (1920×1080, ter-132b 字体 → 120 列 × 33 行)
 - REJECT 连接：红色 (1)
 - Arch logo：青色 (6) 加粗
 - 提示符：白色加粗
+
+## 重启后追加的问题
+
+### 10. 合盖会导致路由器休眠
+- systemd-logind 默认 `HandleLidSwitch=suspend`
+- **修复**: `/etc/systemd/logind.conf` 设为 `HandleLidSwitch=ignore`
+
+### 11. 屏幕自动熄灭
+- Linux 控制台默认 10 分钟无输入后关屏
+- **修复**: GRUB 加 `consoleblank=0` 内核参数
+
+### 12. vconsole.conf 字体写错
+- 写了 `FONT=ter-228b`（14×28px），应为 `ter-132b`（16×32px）
+- **修复**: 更正为 `FONT=ter-132b`
+- **验证**: 重启后 `stty -F /dev/tty2 size` → `33 120` ✓
+
+### 重启验证结果
+
+```
+mihomo          enabled=active     ✅
+nftables        enabled=inactive   ✅ (oneshot, rules loaded)
+dnsmasq         enabled=active     ✅
+hostapd         enabled=active     ✅
+router-mon      enabled=active     ✅
+wifi-lan-ip     enabled=active     ✅
+WAN IP:         192.168.1.195      ✅
+WiFi IP:        192.168.2.1        ✅
+net.ipv4.ip_forward = 1           ✅
+Font:           120×33 (ter-132b)  ✅
+```
