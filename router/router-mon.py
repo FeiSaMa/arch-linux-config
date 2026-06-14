@@ -23,9 +23,19 @@ def get_conns():
 
 def get_proxies():
     d=api("/proxies")
-    if not d: return {}
-    return {n:(p.get("now","?"),f"{p['history'][-1]['delay']}ms" if p.get("history") else "?")
-            for n,p in d.get("proxies",{}).items() if p.get("type")=="Selector"}
+    if not d: return [], ""
+    px=d.get("proxies",{})
+    # Find URLTest group and its selected node
+    for name,p in px.items():
+        if p.get("type")=="URLTest":
+            now=p.get("now","?")
+            # Get that node's delay from individual proxy entry
+            dl="?"
+            if now in px:
+                h=px[now].get("history",[])
+                dl=f"{h[-1].get('delay','?')}ms" if h else "?"
+            return [(now[:20],dl)], ""
+    return [], ""
 
 def fb(n):
     if not n or n<1024: return f"{n or 0}B"
@@ -121,9 +131,9 @@ def run(stdscr):
 
             stdscr.addstr(row,1,f"Up:{fb(ul)} Dn:{fb(dl)} Conns:{len(sc)}")
             row+=1
-            pn=list(proxies.items()) if proxies else []
-            nd=f"{pn[0][1][0][:14]} {pn[0][1][1]}" if pn else "--"
-            stdscr.addstr(row,1,f"Node {nd}")
+            # Proxy node display
+            pp = proxies[0] if proxies else ("--","")
+            stdscr.addstr(row, 1, f"Node {pp[0]} {pp[1]}")
             row+=1
 
             stdscr.hline(row,0,curses.ACS_HLINE,MW-1)
@@ -185,7 +195,7 @@ def run(stdscr):
             # Bottom bar
             stdscr.hline(H-2,0,curses.ACS_HLINE,W)
             stdscr.addch(H-2,MW-1,curses.ACS_PLUS)
-            nd2=pn[0][1][0][:14] if pn else "--"
+            nd2 = proxies[0][0][:14] if proxies else "--"
             stdscr.move(H-1,0); stdscr.clrtoeol()
             footer = f"q quit | {nd2} | UP {fs(us)} DN {fs(ds)}"
             stdscr.addstr(H-1, max(1, (W-len(footer))//2), footer, fp)
