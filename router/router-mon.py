@@ -236,7 +236,7 @@ def run(stdscr):
             stdscr.addch(conns_div, MW-1, ord('+'))
 
             stdscr.refresh()
-            time.sleep(FPS)
+            time.sleep(1/FPS)
 
         except KeyboardInterrupt: break
         except Exception as e:
