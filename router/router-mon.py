@@ -81,6 +81,21 @@ def rs(chains):
     if "REJECT" in first.upper(): return "R", 1  # red
     return "P", 5  # magenta
 
+def usage_bar(line):
+    """Extract percentage from line, return visual bar string."""
+    import re
+    m = re.search(r'\((\d+)%\)', line)
+    if not m: return None
+    pct = int(m.group(1))
+    bw = 12
+    fill = int(pct / 100 * bw)
+    return f"[{'#'*fill}{' '*(bw-fill)}]"
+    if not chains: return "P", 5
+    first = chains[0]
+    if "DIRECT" in first.upper(): return "D", 2  # green
+    if "REJECT" in first.upper(): return "R", 1  # red
+    return "P", 5  # magenta
+
 def run(stdscr):
     curses.curs_set(0)
     curses.use_default_colors()
@@ -216,7 +231,15 @@ def run(stdscr):
                 if "\033[4" in line or "\033[10" in line: continue
                 if shown>=18: break
                 if rr>=H-3: break
-                stdscr.addstr(rr, MW+1, sanitize(line[:MW-2]))
+                # Add usage bar for Memory/Disk/Swap lines
+                bar = usage_bar(ls)
+                if bar and ("Memory:" in ls or "Swap:" in ls or "Disk" in ls):
+                    import re
+                    rest = re.sub(r'\s*\(\d+%\).*', '', sanitize(line)).rstrip()
+                    display = f"{rest[:22]} {bar}"[:MW-2]
+                else:
+                    display = sanitize(line[:MW-2])
+                stdscr.addstr(rr, MW+1, display)
                 rr+=1; shown+=1
 
             # Bottom bar
