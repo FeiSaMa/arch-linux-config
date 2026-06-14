@@ -5,10 +5,33 @@ import curses
 import json
 import time
 import subprocess
+import re
 from datetime import datetime
 from urllib.request import urlopen, Request
 
 API="http://127.0.0.1:9097"; KEY="20080201"; FPS=1
+
+def sanitize(s):
+    """Strip CJK, emoji, and non-ASCII for TTY console font compat."""
+    if not s: return s
+    s = str(s)
+    # Specific known Chinese/emoji from Mihomo
+    rep = {
+        '🔰':'','🚀':'',
+        '节点选择':'','自动选择':'','全球直连':'',
+        '香港':'HK','台湾':'TW','日本':'JP','韩国':'KR',
+        '新加坡':'SG','马来西亚':'MY','印度':'IN',
+        '俄罗斯':'RU','土耳其':'TR','英国':'UK','法国':'FR','德国':'DE',
+        '硅谷':'SV','洛杉矶':'LA','纽约':'NY','圣何塞':'SJ','西雅图':'SEA',
+        '原生':'','专线':'','综合':'','BGP':'',
+    }
+    for k,v in rep.items():
+        s = s.replace(k, v)
+    # Remove any remaining emoji and CJK ranges
+    s = re.sub(r'[\U0001F300-\U0001F9FF\u2600-\u26FF\u2700-\u27BF\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]', '', s)
+    # Clean up extra spaces
+    s = re.sub(r'  +', ' ', s).strip()
+    return s
 
 def api(endpoint):
     try:
@@ -32,7 +55,7 @@ def get_proxies():
             if now in px:
                 h=px[now].get("history",[])
                 dl=f"{h[-1].get('delay','?')}ms" if h else "?"
-            return [(now[:20],dl)]
+            return [(sanitize(now[:20]), dl)]
     return []
 
 def fb(n):
@@ -145,7 +168,7 @@ def run(stdscr):
             for n, c in enumerate(sc[:16]):
                 if row >= max_conn_row: break
                 meta=c.get("metadata",{}); cid=c.get("id","")
-                dst=meta.get("host","") or meta.get("destinationIP","?")
+                dst=sanitize(meta.get("host","") or meta.get("destinationIP","?"))
                 port=meta.get("destinationPort","")
                 ds2,us2=speeds.get(cid,(0,0))
                 dl2=fs(ds2) if ds2>0 else "    -"; ul2=fs(us2) if us2>0 else "    -"
@@ -187,7 +210,7 @@ def run(stdscr):
                 if "\033[4" in line or "\033[10" in line: continue
                 if shown>=18: break
                 if rr>=H-3: break
-                stdscr.addstr(rr, MW+1, line[:MW-2])
+                stdscr.addstr(rr, MW+1, sanitize(line[:MW-2]))
                 rr+=1; shown+=1
 
             # Bottom bar
