@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 from urllib.request import urlopen, Request
 
-API="http://127.0.0.1:9097"; KEY="20080201"; FPS=1
+API="http://127.0.0.1:9097"; KEY="20080201"; FPS=60
 
 def sanitize(s):
     """Strip CJK, emoji, and non-ASCII for TTY console font compat."""
@@ -94,8 +94,7 @@ def run(stdscr):
     curses.init_pair(7, curses.COLOR_WHITE, -1)
 
     pu=pd=None; pt=time.time(); ps={}; peak_us=peak_ds=0
-    fp=curses.A_BOLD
-
+    fp=curses.A_BOLD; frame=0; ff_lines=[]
     while True:
         try:
             now=time.time(); ts=datetime.now().strftime("%H:%M:%S")
@@ -120,12 +119,14 @@ def run(stdscr):
             ps={k:v for k,v in ps.items() if k in {c.get("id","") for c in conns}}
             sc=sorted(conns,key=lambda c: speeds.get(c.get("id",""),(0,0))[0],reverse=True)
 
-            # fastfetch (with native Arch logo)
-            try:
-                raw=subprocess.run(["fastfetch","--logo","none","--pipe"],
-                    capture_output=True,text=True,timeout=2).stdout
-                ff_lines=raw.split("\n")
-            except: ff_lines=[]
+            # fastfetch (once per second)
+            if frame % FPS == 0:
+                try:
+                    raw=subprocess.run(["fastfetch","--logo","none","--pipe"],
+                        capture_output=True,text=True,timeout=2).stdout
+                    ff_lines=raw.split("\n")
+                except: pass
+            frame+=1
 
             # get terminal size dynamically
             H,W=stdscr.getmaxyx()
