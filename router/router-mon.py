@@ -88,7 +88,7 @@ def usage_bar(line):
     if not m: return None
     pct = int(m.group(1))
     bw = 12
-    fill = int(pct / 100 * bw)
+    fill = max(1, int(pct / 100 * bw)) if pct > 0 else 0
     return f"[{'#'*fill}{' '*(bw-fill)}]"
     if not chains: return "P", 5
     first = chains[0]
@@ -236,7 +236,7 @@ def run(stdscr):
                 if bar and ("Memory:" in ls or "Swap:" in ls or "Disk" in ls):
                     import re
                     rest = re.sub(r'\s*\(\d+%\).*', '', sanitize(line)).rstrip()
-                    display = f"{rest[:22]} {bar}"[:MW-2]
+                    display = f"{rest[:30]} {bar}"[:MW-2]
                 else:
                     display = sanitize(line[:MW-2])
                 stdscr.addstr(rr, MW+1, display)
