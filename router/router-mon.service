@@ -1,0 +1,19 @@
+[Unit]
+Description=T14 Router Monitor (tty2)
+After=network-online.target mihomo.service
+Wants=mihomo.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/router-mon.py
+StandardInput=tty
+StandardOutput=tty
+TTYPath=/dev/tty2
+TTYReset=yes
+TTYVHangup=yes
+Restart=always
+RestartSec=2
+User=feisama
+
+[Install]
+WantedBy=multi-user.target
