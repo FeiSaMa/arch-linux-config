@@ -85,7 +85,7 @@ def run(stdscr):
 
             # fastfetch (with native Arch logo)
             try:
-                raw=subprocess.run(["fastfetch","--pipe"],
+                raw=subprocess.run(["fastfetch","--logo-type","small","--pipe"],
                     capture_output=True,text=True,timeout=2).stdout
                 ff_lines=raw.split("\n")
             except: ff_lines=[]
