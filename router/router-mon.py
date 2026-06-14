@@ -93,7 +93,7 @@ def run(stdscr):
     curses.init_pair(6, curses.COLOR_CYAN, -1)
     curses.init_pair(7, curses.COLOR_WHITE, -1)
 
-    pu=pd=0; pt=time.time(); ps={}
+    pu=pd=0; pt=time.time(); ps={}; peak_us=peak_ds=0
     fp=curses.A_BOLD
 
     while True:
@@ -104,6 +104,7 @@ def run(stdscr):
             ela=max(now-pt,0.1)
             us=max(0,int(((ul or 0)-pu)/ela))
             ds=max(0,int(((dl or 0)-pd)/ela))
+            peak_us=max(peak_us,us); peak_ds=max(peak_ds,ds)
             pu,pd,pt=ul or 0,dl or 0,now
 
             speeds={}
@@ -138,11 +139,12 @@ def run(stdscr):
             row=2
 
             # LEFT PANEL
-            # Speed
-            sca=max(us,ds,1); uw=int(min(us/sca*18,18)); dw=int(min(ds/sca*18,18))
-            stdscr.addstr(row,1,f"UP  {'#'*uw}{' '*(18-uw)} {fs(us).rjust(9)}",curses.A_BOLD)
+            # Speed bars with [brackets] showing ratio to peak
+            uw = int(min(us / peak_us * 18, 18)) if peak_us > 0 else 0
+            dw = int(min(ds / peak_ds * 18, 18)) if peak_ds > 0 else 0
+            stdscr.addstr(row,1,f"UP [{('#'*uw).ljust(18)}] {fs(us).rjust(9)}",curses.A_BOLD)
             row+=1
-            stdscr.addstr(row,1,f"DN  {'#'*dw}{' '*(18-dw)} {fs(ds).rjust(9)}",curses.A_BOLD)
+            stdscr.addstr(row,1,f"DN [{('#'*dw).ljust(18)}] {fs(ds).rjust(9)}",curses.A_BOLD)
             row+=2
 
             stdscr.addstr(row,1,f"Up:{fb(ul)} Dn:{fb(dl)} Conns:{len(sc)}")
