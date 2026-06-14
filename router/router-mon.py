@@ -131,10 +131,6 @@ def run(stdscr):
             stdscr.addstr(0,MW," Arch Linux",curses.A_BOLD)
             stdscr.addstr(0,W-9,ts)
 
-            # Column dividers
-            for y in range(H):
-                stdscr.addch(y,MW-1,ord('|'))
-
             # Divider line
             stdscr.hline(1,0,ord('-'),W)
             stdscr.addch(1,MW-1,ord('+'))
@@ -158,6 +154,7 @@ def run(stdscr):
 
             stdscr.hline(row,0,ord('-'),MW-1)
             stdscr.addch(row,MW-1,ord('+'))
+            conns_div = row
             row+=1
 
             stdscr.addstr(row,1,f"CONNS ({len(sc)})",fp)
@@ -219,6 +216,14 @@ def run(stdscr):
             stdscr.move(H-1,0); stdscr.clrtoeol()
             footer = f"q quit | {nd2} | UP {fs(us)} DN {fs(ds)}"
             stdscr.addstr(H-1, max(1, (W-len(footer))//2), footer, fp)
+
+            # Draw vertical divider LAST (after all clearing)
+            for y in range(H):
+                try: stdscr.addch(y, MW-1, ord('|'))
+                except: pass
+            stdscr.addch(1, MW-1, ord('+'))
+            stdscr.addch(H-2, MW-1, ord('+'))
+            stdscr.addch(conns_div, MW-1, ord('+'))
 
             stdscr.refresh()
             time.sleep(FPS)
