@@ -157,7 +157,10 @@ def run(stdscr):
             conns_div = row
             row+=1
 
-            stdscr.addstr(row,1,f"CONNS ({len(sc)})",fp)
+            stdscr.addstr(row,1,f"CONNS ({len(sc)}):",fp)
+            stdscr.addstr(row, 4, "DEST", fp)
+            stdscr.addstr(row, 30, "DOWN", fp)
+            stdscr.addstr(row, 39, "UP", fp)
             row+=1
             # draw connections (max 16, stop before legend row)
             max_conn_row = H - 5
