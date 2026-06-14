@@ -102,7 +102,7 @@ HEADER = Text(
     justify="center",
 )
 
-def build(time_str, conns_sorted, dl_total, ul_total, up_spd, dn_spd, proxies):
+def build(time_str, conns_sorted, conn_speeds, dl_total, ul_total, up_spd, dn_spd, proxies):
     layout = Layout()
     layout.split(
         Layout(name="top", size=3),
@@ -160,17 +160,19 @@ def build(time_str, conns_sorted, dl_total, ul_total, up_spd, dn_spd, proxies):
 
     for c in conns_sorted[:18]:
         meta = c.get("metadata", {})
+        cid = c.get("id", "")
         dst = meta.get("host", "") or meta.get("destinationIP", "?")
         port = meta.get("destinationPort", "")
         dst_full = f"{dst}:{port}" if port else dst
         sym, clr = rstyle(c.get("rule", ""))
-        dl_traffic = fmt_bytes(c.get("download", 0))
-        ul_traffic = fmt_bytes(c.get("upload", 0))
+        dl_speed, ul_speed = conn_speeds.get(cid, (0, 0))
+        dl_txt = fmt_spd(dl_speed) if dl_speed > 0 else "-"
+        ul_txt = fmt_spd(ul_speed) if ul_speed > 0 else "-"
         tbl.add_row(
             dst_full[:23],
             f"[bold {clr}]{sym}[/]",
-            f"[{clr}]{dl_traffic}[/]",
-            f"[dim]{ul_traffic}[/]",
+            f"[{clr}]{dl_txt}[/]",
+            f"[dim]{ul_txt}[/]",
         )
 
     legend = Text(f"[{MAGENTA}]P[/]=Proxy [{GREEN}]D[/]=Direct [{RED}]R[/]=Reject", justify="center")
@@ -204,6 +206,7 @@ def run():
     console = Console()
     prev_ul = prev_dl = 0
     prev_ts = time.time()
+    prev_conn_state = {}  # {conn_id: (dl, ul)}
 
     with Live(console=console, refresh_per_second=REFRESH_S, screen=True) as live:
         while True:
@@ -221,9 +224,29 @@ def run():
             history_up.pop(0); history_up.append(up_spd)
             history_dn.pop(0); history_dn.append(dn_spd)
 
-            sorted_conns = sorted(conns, key=lambda c: c.get("download", 0), reverse=True)[:16]
+            # Compute per-connection speeds
+            conn_speeds = {}
+            for c in conns:
+                cid = c.get("id", "")
+                dl_cur = c.get("download", 0)
+                ul_cur = c.get("upload", 0)
+                if cid in prev_conn_state:
+                    prev_dl, prev_ul = prev_conn_state[cid]
+                    conn_speeds[cid] = (
+                        max(0, int((dl_cur - prev_dl) / elapsed)),
+                        max(0, int((ul_cur - prev_ul) / elapsed)),
+                    )
+                else:
+                    conn_speeds[cid] = (0, 0)
+                prev_conn_state[cid] = (dl_cur, ul_cur)
+            # prune stale entries
+            active_ids = {c.get("id", "") for c in conns}
+            prev_conn_state = {k: v for k, v in prev_conn_state.items() if k in active_ids}
 
-            layout = build(ts, sorted_conns, dl, ul, up_spd, dn_spd, proxies)
+            # Sort by download speed (most active first)
+            sorted_conns = sorted(conns, key=lambda c: conn_speeds.get(c.get("id", ""), (0, 0))[0], reverse=True)[:18]
+
+            layout = build(ts, sorted_conns, conn_speeds, dl, ul, up_spd, dn_spd, proxies)
             live.update(layout)
             time.sleep(REFRESH_S)
 
