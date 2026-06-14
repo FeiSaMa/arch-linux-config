@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 from urllib.request import urlopen, Request
 
-API="http://127.0.0.1:9097"; KEY="20080201"; FPS=2
+API="http://127.0.0.1:9097"; KEY="20080201"; FPS=1
 
 def sanitize(s):
     """Strip CJK, emoji, and non-ASCII for TTY console font compat."""
