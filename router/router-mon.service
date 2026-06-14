@@ -5,6 +5,7 @@ Wants=mihomo.service
 
 [Service]
 Type=simple
+ExecStartPre=+setfont -C /dev/tty2 ter-132b
 ExecStart=/usr/local/bin/router-mon.py
 StandardInput=tty
 StandardOutput=tty

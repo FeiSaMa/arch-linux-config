@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 T14 Router Monitor — Split-screen: left=monitor, right=fastfetch.
-60 cols (ter-228b), raw ANSI, 38 rows full.
+60 cols (ter-132b), raw ANSI, 38 rows full.
 """
 
 import json, time, sys, subprocess
 from datetime import datetime
 from urllib.request import urlopen, Request
 
-API="http://127.0.0.1:9097"; KEY="20080201"; FPS=1; ROWS=38; W=30  # half width
+API="http://127.0.0.1:9097"; KEY="20080201"; FPS=1; ROWS=33; W=60  # half width
 
 def api(endpoint):
     try:
@@ -52,6 +52,7 @@ def rs(rule):
 def pad(s,n): return (s or "")[:n].ljust(n)
 
 def run():
+    import os; os.system("sudo setfont -C /dev/tty2 ter-132b 2>/dev/null")
     pu=pd=0; pt=time.time(); ps={}; ff_lines=[""]*ROWS
     last_ff=0
 
@@ -85,7 +86,7 @@ def run():
             L=[]
             L.append(f"\033[1m{pad('T14 ROUTER',W)}\033[0m")                     # 1
             L.append(pad("─"*W,W))                                             # 2
-            sca=max(us,ds,1); uw=int(min(us/sca*12,12)); dw=int(min(ds/sca*12,12))
+            sca=max(us,ds,1); uw=int(min(us/sca*24,24)); dw=int(min(ds/sca*24,24))
             L.append(f"\033[36mUP  {'#'*uw}{' '*(12-uw)}  {fs(us)}\033[0m")  # 3
             L.append(f"\033[34mDN  {'#'*dw}{' '*(12-dw)}  {fs(ds)}\033[0m")  # 4
             L.append(pad("",W))                                                 # 5
@@ -95,7 +96,7 @@ def run():
             L.append(pad(f"Node {nd}",W))                                       # 7
             L.append(pad("─"*W,W))                                             # 8
             L.append(pad(f"CONNS ({len(sc)})",W))                               # 9
-            for c in sc[:10]:
+            for c in sc[:18]:
                 meta=c.get("metadata",{})
                 cid=c.get("id",""); dst=meta.get("host","") or meta.get("destinationIP","?")
                 port=meta.get("destinationPort","")
@@ -103,7 +104,7 @@ def run():
                 dl2=fs(ds2) if ds2>0 else "    -"; ul2=fs(us2) if us2>0 else "    -"
                 sym,clr=rs(c.get("rule",""))
                 L.append(f" {clr}{sym}\033[0m {pad((dst+':'+(port or ''))[:20],20)} {dl2} {ul2}")
-            for _ in range(10-len(sc[:10])): L.append(pad("",W))               # pad
+            for _ in range(18-len(sc[:18])): L.append(pad("",W))               # pad
             L.append(pad("\033[35mP=Proxy\033[0m \033[32mD=Direct\033[0m \033[31mR=Reject\033[0m",W))  # 20
             L.append(pad("─"*W,W))                                             # 21
             nd2=pn[0][1][0][:14] if pn else "--"
@@ -125,10 +126,10 @@ def run():
                 if "Terminal: sshd" in line_s or "Terminal: timeout" in line_s: continue
                 if "Locale: C" in line_s: continue
                 if "\033[4" in line_s or "\033[10" in line_s: continue  # color blocks
-                if shown >= 18: break
+                if shown >= 24: break
                 R.append(pad(line[:W],W))
                 shown+=1
-            for _ in range(18-shown): R.append(pad("",W))                       # pad
+            for _ in range(24-shown): R.append(pad("",W))                       # pad
 
             R.append(pad("─"*W,W))                                             # 22
             R.append(pad(f"UP {fs(us)} DN {fs(ds)}",W))                       # 23
