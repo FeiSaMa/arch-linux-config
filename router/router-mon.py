@@ -137,14 +137,14 @@ def run():
             for i in range(ROWS - 1):
                 lp = L[i] if i < len(L) else " "*W
                 rp = R[i] if i < len(R) else " "*W
-                out += f"{pad(lp,W)} {pad(rp,W)}\n"
+                out += f"{pad(lp,W)}{pad(rp,W)}\n"
             i = ROWS - 1
             lp = L[i] if i < len(L) else " "*W
             rp = R[i] if i < len(R) else " "*W
-            out += f"{pad(lp,W)} {pad(rp,W)}"
+            out += f"{pad(lp,W)}{pad(rp,W)}"
             sys.stdout.write(out)
             sys.stdout.flush()
-            out += f"{pad(lp,W)} {pad(rp,W)}"
+            out += f"{pad(lp,W)}{pad(rp,W)}"
             sys.stdout.write(out)
             sys.stdout.flush()
             time.sleep(FPS)
