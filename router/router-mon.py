@@ -83,11 +83,11 @@ def run(stdscr):
             ps={k:v for k,v in ps.items() if k in {c.get("id","") for c in conns}}
             sc=sorted(conns,key=lambda c: speeds.get(c.get("id",""),(0,0))[0],reverse=True)
 
-            # fastfetch
+            # fastfetch (with native Arch logo)
             try:
-                raw=subprocess.run(["fastfetch","--logo","none","--pipe"],
+                raw=subprocess.run(["fastfetch","--pipe"],
                     capture_output=True,text=True,timeout=2).stdout
-                ff_lines=[l.strip() for l in raw.split("\n") if l.strip()]
+                ff_lines=raw.split("\n")
             except: ff_lines=[]
 
             # get terminal size dynamically
@@ -149,30 +149,19 @@ def run(stdscr):
                 stdscr.addstr(row,10,"D=Direct",curses.color_pair(2))
                 stdscr.addstr(row,20,"R=Reject",curses.color_pair(1))
 
-            # RIGHT PANEL — Arch logo + fastfetch
-            ARCH_LOGO = [
-                "     /\\",
-                "    /  \\",
-                "   /    \\",
-                "  /      \\",
-                " /________\\",
-            ]
-            rr = 2
-            for logo_line in ARCH_LOGO:
-                if rr < H-1:
-                    stdscr.addstr(rr, MW+1, logo_line, curses.color_pair(6) | fp)
-                rr += 1
-            rr += 1  # blank line after logo
-            shown = 0
+            # RIGHT PANEL — fastfetch (native logo included)
+            rr=2
+            shown=0
             for line in ff_lines:
-                if "feisama@router" in line: continue
-                if line.replace("-","")=="": continue
-                if "Terminal: sshd" in line or "Terminal: timeout" in line: continue
-                if "Locale: C" in line: continue
-                if "\033" in line: continue
+                ls=line.strip()
+                if not ls: continue
+                if "feisama@router" in ls: continue
+                if ls.replace("-","")=="": continue
+                if "Locale: C" in ls: continue
+                if "\033[4" in line or "\033[10" in line: continue
                 if shown>=24: break
-                if rr>=H-1: break
-                stdscr.addstr(rr,MW+1,line[:MW-2])
+                if rr>=H-3: break
+                stdscr.addstr(rr, MW+1, line[:MW-2])
                 rr+=1; shown+=1
 
             # Bottom bar
