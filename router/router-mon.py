@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""T14 Router Monitor — split-screen (left=traffic, right=fastfetch). 120x33, ANSI."""
+"""T14 Router Monitor — curses full-screen TUI, 120x33 grid."""
 
-import json, time, sys, subprocess
+import curses
+import json
+import time
+import subprocess
 from datetime import datetime
 from urllib.request import urlopen, Request
 
-API="http://127.0.0.1:9097"; KEY="20080201"; FPS=1; ROWS=33; W=60
+API="http://127.0.0.1:9097"; KEY="20080201"; FPS=1
 
 def api(endpoint):
     try:
         req=Request(f"{API}{endpoint}",headers={"Authorization":f"Bearer {KEY}"})
-        with urlopen(req,timeout=3) as r: return json.loads(r.read().decode())
+        with urlopen(req,timeout=2) as r: return json.loads(r.read().decode())
     except: return None
 
 def get_conns():
@@ -33,20 +36,34 @@ def fb(n):
 
 def fs(bps):
     try: v=max(0,int(bps or 0))
-    except: return " err"
-    if v<1000: return f"{v:4}B/s"; v/=1000
-    if v<1000: return f"{v:4.0f}K/s"; v/=1000; return f"{v:4.1f}M/s"
+    except: return "err"
+    if v<1000: return f"{v:4}B/s"
+    v/=1000
+    if v<1000: return f"{v:4.0f}K/s"
+    v/=1000
+    return f"{v:4.1f}M/s"
 
 def rs(rule):
     u=(rule or "").upper()
-    if "DIRECT" in u: return "D","\033[32m"
-    if "REJECT" in u: return "R","\033[31m"
-    return "P","\033[35m"
+    if "DIRECT" in u: return "D", 2  # green
+    if "REJECT" in u: return "R", 1  # red
+    return "P", 5  # magenta
 
-def pad(s,n): return (s or "")[:n].ljust(n)
+def run(stdscr):
+    curses.curs_set(0)
+    curses.use_default_colors()
+    curses.start_color()
+    curses.init_pair(1, curses.COLOR_RED, -1)
+    curses.init_pair(2, curses.COLOR_GREEN, -1)
+    curses.init_pair(3, curses.COLOR_YELLOW, -1)
+    curses.init_pair(4, curses.COLOR_BLUE, -1)
+    curses.init_pair(5, curses.COLOR_MAGENTA, -1)
+    curses.init_pair(6, curses.COLOR_CYAN, -1)
+    curses.init_pair(7, curses.COLOR_WHITE, -1)
 
-def run():
-    pu=pd=0; pt=time.time(); ps={}; ff_lines=[""]*ROWS
+    pu=pd=0; pt=time.time(); ps={}
+    fp=curses.A_BOLD
+
     while True:
         try:
             now=time.time(); ts=datetime.now().strftime("%H:%M:%S")
@@ -70,77 +87,96 @@ def run():
             try:
                 raw=subprocess.run(["fastfetch","--logo","none","--pipe"],
                     capture_output=True,text=True,timeout=2).stdout
-                ff_lines=raw.strip().split("\n")
-            except: pass
+                ff_lines=[l.strip() for l in raw.split("\n") if l.strip()]
+            except: ff_lines=[]
 
-            # BUILD LEFT
-            L=[]
-            L.append(f"\033[1m{pad('T14 ROUTER',W)}\033[0m")
-            L.append(pad("-"*W,W))
-            sca=max(us,ds,1); uw=int(min(us/sca*24,24)); dw=int(min(ds/sca*24,24))
-            L.append(f"\033[36mUP  {'#'*uw}{' '*(24-uw)}  {fs(us)}\033[0m")
-            L.append(f"\033[34mDN  {'#'*dw}{' '*(24-dw)}  {fs(ds)}\033[0m")
-            L.append(pad("",W))
-            L.append(pad(f"Up:{fb(ul)} Dn:{fb(dl)} Conns:{len(sc)}",W))
+            # get terminal size dynamically
+            H,W=stdscr.getmaxyx()
+            MW=W//2  # mid split
+
+            # Top bar
+            stdscr.addstr(0,0," T14 ROUTER MONITOR",curses.A_BOLD)
+            stdscr.addstr(0,MW," SYSTEM",curses.A_BOLD)
+            stdscr.addstr(0,W-9,ts)
+
+            # Column dividers
+            for y in range(H):
+                try: stdscr.addch(y,MW-1,curses.ACS_VLINE)
+                except: pass
+
+            # Divider line
+            stdscr.hline(1,0,curses.ACS_HLINE,W)
+            stdscr.addch(1,MW-1,curses.ACS_PLUS)
+
+            row=2
+
+            # LEFT PANEL
+            # Speed
+            sca=max(us,ds,1); uw=int(min(us/sca*18,18)); dw=int(min(ds/sca*18,18))
+            stdscr.addstr(row,1,f"UP  {'#'*uw}{' '*(18-uw)} {fs(us).rjust(10)}",curses.color_pair(6)|fp)
+            row+=1
+            stdscr.addstr(row,1,f"DN  {'#'*dw}{' '*(18-dw)} {fs(ds).rjust(10)}",curses.color_pair(4)|fp)
+            row+=2
+
+            stdscr.addstr(row,1,f"Up:{fb(ul)} Dn:{fb(dl)} Conns:{len(sc)}")
+            row+=1
             pn=list(proxies.items()) if proxies else []
             nd=f"{pn[0][1][0][:14]} {pn[0][1][1]}" if pn else "--"
-            L.append(pad(f"Node {nd}",W))
-            L.append(pad("-"*W,W))
-            L.append(pad(f"CONNS ({len(sc)})",W))
+            stdscr.addstr(row,1,f"Node {nd}")
+            row+=1
+
+            stdscr.hline(row,0,curses.ACS_HLINE,MW-1)
+            stdscr.addch(row,MW-1,curses.ACS_PLUS)
+            row+=1
+
+            stdscr.addstr(row,1,f"CONNS ({len(sc)})",fp)
+            row+=1
             for c in sc[:18]:
                 meta=c.get("metadata",{}); cid=c.get("id","")
                 dst=meta.get("host","") or meta.get("destinationIP","?")
                 port=meta.get("destinationPort","")
                 ds2,us2=speeds.get(cid,(0,0))
                 dl2=fs(ds2) if ds2>0 else "    -"; ul2=fs(us2) if us2>0 else "    -"
-                sym,clr=rs(c.get("rule",""))
-                L.append(f" {clr}{sym}\033[0m {pad((dst+':'+(port or ''))[:20],20)} {dl2} {ul2}")
-            for _ in range(18-len(sc[:18])): L.append(pad("",W))
-            L.append(pad("\033[35mP=Proxy\033[0m \033[32mD=Direct\033[0m \033[31mR=Reject\033[0m",W))
-            L.append(pad("-"*W,W))
-            nd2=pn[0][1][0][:14] if pn else "--"
-            L.append(pad(f"\033[31mq\033[0m quit | {nd2}",W))
+                sym,clr_pair=rs(c.get("rule",""))
+                if row>=H-1: break
+                stdscr.addstr(row,1,f" {sym} ",curses.color_pair(clr_pair)|fp)
+                stdscr.addstr(row,3,f"{(dst+':'+(port or ''))[:22].ljust(22)} {dl2} {ul2}")
+                row+=1
+            # legend
+            if row<H-3:
+                row+=1
+                stdscr.addstr(row,1,"P=Proxy",curses.color_pair(5))
+                stdscr.addstr(row,10,"D=Direct",curses.color_pair(2))
+                stdscr.addstr(row,20,"R=Reject",curses.color_pair(1))
 
-            # BUILD RIGHT
-            R=[]
-            R.append(f"\033[1m{pad('SYSTEM',W)}\033[0m")
-            R.append(pad("-"*W,W))
+            # RIGHT PANEL — fastfetch
+            rr=2
             shown=0
             for line in ff_lines:
-                ls=line.strip()
-                if not ls: continue
-                if "feisama@router" in ls: continue
-                if ls.replace("-","")=="": continue
-                if "Terminal: sshd" in ls or "Terminal: timeout" in ls: continue
-                if "Locale: C" in ls: continue
-                if "\033[4" in ls or "\033[10" in ls: continue
+                if "feisama@router" in line: continue
+                if line.replace("-","")=="": continue
+                if "Terminal: sshd" in line or "Terminal: timeout" in line: continue
+                if "Locale: C" in line: continue
+                if "\033" in line: continue
                 if shown>=24: break
-                R.append(pad(line[:W],W)); shown+=1
-            for _ in range(24-shown): R.append(pad("",W))
-            R.append(pad("-"*W,W))
-            R.append(pad(f"UP {fs(us)} DN {fs(ds)}",W))
+                if rr>=H-1: break
+                stdscr.addstr(rr,MW+1,line[:MW-2])
+                rr+=1; shown+=1
 
-            # --- RENDER (scroll margin - fixed status bar) ---
-            out = "\033[2J\033[1;32r\033[1;1H"
-            for i in range(ROWS - 1):
-                lp = L[i] if i < len(L) else " "*W
-                rp = R[i] if i < len(R) else " "*W
-                out += f"{pad(lp,W)}{pad(rp,W)}\n"
-            # fixed last row
-            i = ROWS - 1
-            lp = L[i] if i < len(L) else " "*W
-            rp = R[i] if i < len(R) else " "*W
-            out += f"\033[33;1H{pad(lp,W)}{pad(rp,W)}"
-            sys.stdout.write(out)
-            sys.stdout.flush()
+            # Bottom bar
+            stdscr.hline(H-2,0,curses.ACS_HLINE,W)
+            stdscr.addch(H-2,MW-1,curses.ACS_PLUS)
+            nd2=pn[0][1][0][:14] if pn else "--"
+            stdscr.addstr(H-1,1,f"q quit | {nd2} | UP {fs(us)} DN {fs(ds)}",fp)
 
+            stdscr.refresh()
             time.sleep(FPS)
+
+        except KeyboardInterrupt: break
         except Exception as e:
-            sys.stdout.write(f"\033[r\033[2J\033[HERROR: {e}\n")
-            sys.stdout.flush(); time.sleep(3)
+            stdscr.addstr(H-1,1,f"ERROR: {e}"[:W-2],curses.color_pair(1))
+            stdscr.refresh()
+            time.sleep(2)
 
 if __name__=="__main__":
-    try: run()
-    except KeyboardInterrupt:
-        sys.stdout.write("\033[r")  # reset scroll margins
-        sys.exit(0)
+    curses.wrapper(run)

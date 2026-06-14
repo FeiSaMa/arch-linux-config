@@ -12,6 +12,7 @@ StandardOutput=tty
 TTYPath=/dev/tty2
 TTYReset=yes
 TTYVHangup=yes
+Environment=TERM=linux
 Restart=always
 RestartSec=2
 User=feisama
