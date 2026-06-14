@@ -93,7 +93,7 @@ def run(stdscr):
     curses.init_pair(6, curses.COLOR_CYAN, -1)
     curses.init_pair(7, curses.COLOR_WHITE, -1)
 
-    pu=pd=0; pt=time.time(); ps={}; peak_us=peak_ds=0
+    pu=pd=None; pt=time.time(); ps={}; peak_us=peak_ds=0
     fp=curses.A_BOLD
 
     while True:
@@ -102,10 +102,14 @@ def run(stdscr):
             conns,dl,ul=get_conns()
             proxies=get_proxies()
             ela=max(now-pt,0.1)
-            us=max(0,int(((ul or 0)-pu)/ela))
-            ds=max(0,int(((dl or 0)-pd)/ela))
-            peak_us=max(peak_us,us); peak_ds=max(peak_ds,ds)
-            pu,pd,pt=ul or 0,dl or 0,now
+            if pu is None:
+                pu,pd,pt=ul or 0,dl or 0,now
+                us=ds=0
+            else:
+                us=max(0,int(((ul or 0)-pu)/ela))
+                ds=max(0,int(((dl or 0)-pd)/ela))
+                peak_us=max(peak_us,us); peak_ds=max(peak_ds,ds)
+                pu,pd,pt=ul or 0,dl or 0,now
 
             speeds={}
             for c in conns:
