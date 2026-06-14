@@ -27,7 +27,7 @@ REFRESH_S = 1
 FG, DIM, CYAN, GREEN, YELLOW, RED, MAGENTA, BLUE, WHITE, BORDER = \
     "white", "bright_black", "cyan", "green", "yellow", "red", "magenta", "blue", "white", "bright_black"
 
-BLOCKS = " ▁▂▃▄▅▆▇█"
+BLOCKS = " .:-=+*8#"
 
 # --- API ---
 
@@ -124,8 +124,8 @@ def build(time_str, conns_sorted, dl_total, ul_total, up_spd, dn_spd, proxies):
     left = Text()
     # speed bars (15 chars max)
     scale = max(up_spd, dn_spd, 1)
-    bar_up = "█" * int(min(up_spd / scale * 13, 13))
-    bar_dn = "█" * int(min(dn_spd / scale * 13, 13))
+    bar_up = "#" * int(min(up_spd / scale * 13, 13))
+    bar_dn = "#" * int(min(dn_spd / scale * 13, 13))
     left.append("[bold cyan]UP[/]\n")
     left.append(f"[cyan]{bar_up}[/] [bold]{fmt_spd(up_spd)}[/]\n\n")
     left.append("[bold blue]DOWN[/]\n")
