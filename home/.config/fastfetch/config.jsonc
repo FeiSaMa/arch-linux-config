@@ -4,11 +4,11 @@
     "type": "builtin",
     "source": "arch",
     "color": {
-      "1": "cyan",
-      "2": "blue",
-      "3": "blue",
-      "4": "cyan",
-      "5": "blue"
+      "1": "magenta",
+      "2": "light_magenta",
+      "3": "light_magenta",
+      "4": "magenta",
+      "5": "light_magenta"
     },
     "padding": {
       "top": 0,
@@ -19,8 +19,8 @@
   "display": {
     "separator": " \uE0B1 ",
     "color": {
-      "keys": "#8aadf4",
-      "title": "#f5bde6",
+      "keys": "#f5bde6",
+      "title": "#f4dbd6",
       "separator": "#8bd5ca"
     },
     "key": {
@@ -49,74 +49,74 @@
     {
       "type": "os",
       "key": "OS",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "host",
       "key": "Host",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "kernel",
       "key": "Kernel",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "uptime",
       "key": "Uptime",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "packages",
       "key": "Packages",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "shell",
       "key": "Shell",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     "separator",
     {
       "type": "display",
       "key": "Display",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "de",
       "key": "DE",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "wm",
       "key": "WM",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "terminal",
       "key": "Terminal",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "terminalfont",
       "key": "Font",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     "separator",
     {
       "type": "cpu",
       "key": "CPU",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "gpu",
       "key": "GPU",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "memory",
       "key": "Memory",
-      "keyColor": "#8aadf4",
+      "keyColor": "#f5bde6",
       "percent": {
         "type": 3,
         "green": 50,
@@ -126,7 +126,7 @@
     {
       "type": "disk",
       "key": "Disk",
-      "keyColor": "#8aadf4",
+      "keyColor": "#f5bde6",
       "percent": {
         "type": 3,
         "green": 50,
@@ -136,18 +136,18 @@
     {
       "type": "battery",
       "key": "Battery",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     "separator",
     {
       "type": "localip",
       "key": "Local IP",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     {
       "type": "locale",
       "key": "Locale",
-      "keyColor": "#8aadf4"
+      "keyColor": "#f5bde6"
     },
     "break",
     {
