@@ -10,7 +10,7 @@ mode: rule
 log-level: info
 ipv6: true
 external-controller: 0.0.0.0:9097
-secret: router2025
+secret: 20080201
 external-controller-cors:
   allow-private-network: true
   allow-origins:
