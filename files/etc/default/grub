@@ -1,0 +1,30 @@
+# GRUB boot loader configuration
+
+GRUB_DEFAULT=saved
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR="Arch"
+GRUB_CMDLINE_LINUX_DEFAULT="loglevel=5 zswap.enabled=0 nmi_watchdog=0 mitigations=off"
+GRUB_CMDLINE_LINUX=""
+
+# Preload both GPT and MBR modules so that they are not missed
+GRUB_PRELOAD_MODULES="part_gpt part_msdos all_video efi_gop"
+
+# Uncomment to enable booting from LUKS encrypted devices
+#GRUB_ENABLE_CRYPTODISK=y
+
+# Uncomment to disable generation of recovery mode menu entries
+GRUB_DISABLE_RECOVERY=true
+GRUB_LANGCODE=en
+
+# Uncomment to disable submenus in boot menu
+#GRUB_DISABLE_SUBMENU=y
+
+# Probing for other operating systems is disabled for security reasons. Read
+# documentation on GRUB_DISABLE_OS_PROBER, if still want to enable this
+# functionality install os-prober and uncomment to detect and include other
+# operating systems.
+GRUB_DISABLE_OS_PROBER=false
+
+GRUB_THEME="/boot/grub/themes/CyberGRUB-2077/theme.txt"
+GRUB_GFXMODE=1920x1200,auto
+GRUB_GFXPAYLOAD_LINUX=keep
