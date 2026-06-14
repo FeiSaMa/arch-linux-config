@@ -11,6 +11,12 @@ log-level: info
 ipv6: true
 external-controller: 0.0.0.0:9097
 secret: router2025
+external-controller-cors:
+  allow-private-network: true
+  allow-origins:
+    - https://metacubex.github.io
+    - https://yacd.metacubex.one
+    - http://yacd.metacubex.one
 
 tun:
   enable: true
