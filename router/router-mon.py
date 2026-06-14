@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-T14 Router Monitor — Full-screen Dashboard for Linux console TTY
-Uses Mihomo REST API. Explicit styles (no inline markup).
+T14 Router Monitor — Full-screen Dashboard
+Layout for full-height, explicit Text() styles for TTY compat.
 """
 
 import json
@@ -10,10 +10,9 @@ import sys
 from datetime import datetime
 from urllib.request import urlopen, Request
 
-from rich.console import Console, Group
+from rich.console import Console
+from rich.layout import Layout
 from rich.live import Live
-from rich.table import Table
-from rich.panel import Panel
 from rich.text import Text
 from rich.align import Align
 from rich import box
@@ -21,6 +20,11 @@ from rich import box
 API_BASE = "http://127.0.0.1:9097"
 SECRET = "20080201"
 REFRESH_S = 1
+
+# --- Styles ---
+S_BOLD, S_DIM, S_WHITE, S_YELLOW, S_RED = "bold", "bright_black", "white", "yellow", "red"
+S_CYAN, S_B_CYAN, S_BLUE, S_B_BLUE, S_MAGENTA, S_GREEN = (
+    "cyan", "bold cyan", "blue", "bold blue", "magenta", "green")
 
 # --- API ---
 
@@ -53,189 +57,153 @@ def fetch_proxies():
     return info
 
 def fmt_bytes(n):
-    if n < 1024:
-        return f"{n}B"
-    for unit in ("K", "M", "G"):
-        n /= 1024
-        if n < 1024:
-            return f"{n:.0f}{unit}"
+    if n < 1024: return f"{n}B"
+    for u in ("K","M","G"):
+        n/=1024
+        if n<1024: return f"{n:.0f}{u}"
     return f"{n:.0f}G"
 
 def fmt_spd(bps):
-    if bps < 1000:
-        return f"{bps:.0f}B/s"
-    bps /= 1000
-    if bps < 1000:
-        return f"{bps:.0f}K/s"
-    bps /= 1000
-    return f"{bps:.1f}M/s"
+    if bps < 1000: return f"{bps:.0f}B/s"
+    bps/=1000
+    if bps<1000: return f"{bps:.0f}K/s"
+    bps/=1000; return f"{bps:.1f}M/s"
 
 def rstyle(rule):
     u = (rule or "").upper()
-    if "DIRECT" in u:
-        return ("D", "green", "green")
-    if "REJECT" in u:
-        return ("R", "red", "red")
-    return ("P", "magenta", "magenta")
+    if "DIRECT" in u: return "D", S_GREEN
+    if "REJECT" in u: return "R", S_RED
+    return "P", S_MAGENTA
 
-# --- Build display ---
+# --- Layout ---
 
-S_BOLD_CYAN = "bold cyan"
-S_BOLD_BLUE = "bold blue"
-S_CYAN = "cyan"
-S_BLUE = "blue"
-S_DIM = "bright_black"
-S_BOLD = "bold"
-S_WHITE = "white"
-S_YELLOW = "yellow"
-S_RED = "red"
-S_MAGENTA = "magenta"
+def build(ts, conns, speeds, dl, ul, us, ds, proxies):
+    layout = Layout()
 
-def build(time_str, conns_sorted, conn_speeds, dl_total, ul_total, up_spd, dn_spd, proxies):
-    rows = []
+    # Build left panel text
+    left = Text()
 
-    # --- HEADER ---
-    header = Text()
-    header.append("T14 ROUTER MONITOR", style="bold")
-    header.append(f"  {time_str}", style=S_DIM)
-    rows.append(Align.center(header))
+    # UP bar
+    scale = max(us, ds, 1)
+    up_w = int(min(us / scale * 22, 22))
+    left.append(Text("UP\n", style=S_B_CYAN))
+    left.append(Text("#" * up_w + " " * (22 - up_w), style=S_CYAN))
+    left.append(Text(f"\n{fmt_spd(us)}\n\n", style=S_B_CYAN))
 
-    # --- DIVIDER ---
-    rows.append(Text("─" * 60, style=S_DIM))
+    # DOWN bar
+    dn_w = int(min(ds / scale * 22, 22))
+    left.append(Text("DOWN\n", style=S_B_BLUE))
+    left.append(Text("#" * dn_w + " " * (22 - dn_w), style=S_BLUE))
+    left.append(Text(f"\n{fmt_spd(ds)}\n\n", style=S_B_BLUE))
 
-    # --- SPEED SECTION ---
-    scale = max(up_spd, dn_spd, 1)
-    up_w = int(min(up_spd / scale * 22, 22))
-    dn_w = int(min(dn_spd / scale * 22, 22))
+    # Totals
+    left.append(Text("TOTAL\n", style=S_BOLD))
+    left.append(Text(f"Up  {fmt_bytes(ul)}\n", style=S_CYAN))
+    left.append(Text(f"Dn  {fmt_bytes(dl)}\n", style=S_BLUE))
+    left.append(Text(f"Conns {len(conns)}\n\n", style=S_YELLOW))
 
-    # UP row
-    up_line = Text()
-    up_line.append("UP  ", style=S_BOLD_CYAN)
-    up_line.append("#" * up_w, style=S_CYAN)
-    up_line.append(" " * (22 - up_w))
-    up_line.append(fmt_spd(up_spd).rjust(10), style=S_BOLD_CYAN)
-    rows.append(up_line)
-
-    # DOWN row
-    dn_line = Text()
-    dn_line.append("DN  ", style=S_BOLD_BLUE)
-    dn_line.append("#" * dn_w, style=S_BLUE)
-    dn_line.append(" " * (22 - dn_w))
-    dn_line.append(fmt_spd(dn_spd).rjust(10), style=S_BOLD_BLUE)
-    rows.append(dn_line)
-
-    # TOTAL row
-    total_line = Text()
-    total_line.append(f"Total  Up:{fmt_bytes(ul_total).rjust(8)}", style=S_WHITE)
-    total_line.append(f"  Dn:{fmt_bytes(dl_total).rjust(8)}", style=S_WHITE)
-    total_line.append(f"  Conns:{len(conns_sorted)}", style=S_YELLOW)
-    rows.append(total_line)
-
-    # NODE row
+    # Node
     if proxies:
         first = list(proxies.items())[0]
         name, (now, delay) = first
-        node_line = Text()
-        node_line.append(f"Node  {now[:18]}", style=S_BOLD)
-        node_line.append(f"  {delay}", style=S_YELLOW)
-        rows.append(node_line)
+        left.append(Text("NODE\n", style=S_BOLD))
+        left.append(Text(f"{now[:16]}\n", style=S_WHITE))
+        left.append(Text(f"{delay}", style=S_YELLOW))
 
-    rows.append(Text("─" * 60, style=S_DIM))
+    # Build connection list text
+    conn_text = Text()
 
-    # --- CONNECTIONS TABLE ---
-    c_header = Text()
-    c_header.append("CONNECTIONS", style="bold")
-    c_header.append(f" ({len(conns_sorted)})", style=S_YELLOW)
-    c_header.append("                               ▲down ▼up", style=S_DIM)
-    rows.append(c_header)
-
-    for c in conns_sorted[:20]:
+    for c in conns[:26]:
         meta = c.get("metadata", {})
         cid = c.get("id", "")
         dst = meta.get("host", "") or meta.get("destinationIP", "?")
         port = meta.get("destinationPort", "")
-        dst_full = f"{dst}:{port}" if port else dst
-        sym, clr_fg, clr = rstyle(c.get("rule", ""))
-        dl_speed, ul_speed = conn_speeds.get(cid, (0, 0))
-        dl_txt = fmt_spd(dl_speed) if dl_speed > 0 else " -"
-        ul_txt = fmt_spd(ul_speed) if ul_speed > 0 else " -"
+        dl_s, ul_s = speeds.get(cid, (0, 0))
+        dl_t = fmt_spd(dl_s) if dl_s > 0 else "-"
+        ul_t = fmt_spd(ul_s) if ul_s > 0 else "-"
+        sym, clr = rstyle(c.get("rule", ""))
 
-        c_line = Text()
-        c_line.append(" ", style=clr_fg)
-        c_line.append(sym, style=clr_fg)
-        c_line.append(f" {dst_full[:28].ljust(28)}", style=S_WHITE)
-        c_line.append(f"{dl_txt.rjust(8)}", style=clr_fg)
-        c_line.append(f" {ul_txt.rjust(8)}", style=S_DIM)
-        rows.append(c_line)
+        line = Text()
+        line.append(sym + " ", style=clr)
+        line.append(f"{(dst+':'+port)[:26].ljust(26)}", style=S_WHITE)
+        dl_t_pad = dl_t.rjust(8)
+        ul_t_pad = ul_t.rjust(8)
+        line.append(dl_t_pad, style=clr)
+        line.append(" ")
+        line.append(ul_t_pad, style=S_DIM)
+        line.append("\n")
+        conn_text.append(line)
 
     # Legend
-    legend = Text()
-    legend.append(" P=Proxy ", style=S_MAGENTA)
-    legend.append(" D=Direct ", style="green")
-    legend.append(" R=Reject", style=S_RED)
-    rows.append(legend)
+    conn_text.append(Text(f"\n", style=S_DIM))
+    conn_text.append(Text("P=Proxy", style=S_MAGENTA))
+    conn_text.append(Text(" D=Direct", style=S_GREEN))
+    conn_text.append(Text(" R=Reject", style=S_RED))
 
-    rows.append(Text("─" * 60, style=S_DIM))
+    # Bottom bar
+    bot = Text()
+    bot.append(Text("q quit", style=S_RED))
+    if proxies:
+        name, (now, delay) = list(proxies.items())[0]
+        bot.append(Text(f"  |  {now[:14]}", style=S_WHITE))
+    bot.append(Text(f"  |  UP {fmt_spd(us)}", style=S_B_CYAN))
+    bot.append(Text(f"  DN {fmt_spd(ds)}", style=S_B_BLUE))
 
-    # --- FOOTER ---
-    footer = Text()
-    footer.append("q quit", style=S_RED)
-    footer.append(f"  │  {len(proxies)} nodes", style=S_WHITE)
-    footer.append(f"  │  ", style=S_DIM)
-    footer.append(f"UP {fmt_spd(up_spd)}", style=S_BOLD_CYAN)
-    footer.append(f"  DN {fmt_spd(dn_spd)}", style=S_BOLD_BLUE)
-    rows.append(footer)
+    # Placeholders with explicit text
+    hdr = Text()
+    hdr.append("T14 ROUTER MONITOR", style=S_BOLD)
+    hdr.append(f"    {ts}", style=S_DIM)
 
-    return Group(*rows)
+    layout.split(
+        Layout(Align.center(hdr), name="h", size=1),
+        Layout(name="m"),
+        Layout(name="b", size=1),
+    )
+    layout["m"].split_row(
+        Layout(left, name="l", ratio=2),
+        Layout(conn_text, name="r", ratio=3),
+    )
+    layout["b"].update(Align.center(bot))
+
+    return layout
 
 
-# --- MAIN ---
+# --- Main ---
 
 def run():
     console = Console()
     prev_ul = prev_dl = 0
     prev_ts = time.time()
-    prev_conn_state = {}
+    prev_state = {}
 
     with Live(console=console, refresh_per_second=REFRESH_S, screen=True) as live:
         while True:
             now = time.time()
             ts = datetime.now().strftime("%H:%M:%S")
-
             conns, dl, ul = fetch_conns()
             proxies = fetch_proxies()
-
             elapsed = max(now - prev_ts, 0.1)
-            up_spd = max(0, int((ul - prev_ul) / elapsed))
-            dn_spd = max(0, int((dl - prev_dl) / elapsed))
+            us = max(0, int((ul - prev_ul) / elapsed))
+            ds = max(0, int((dl - prev_dl) / elapsed))
             prev_ul, prev_dl, prev_ts = ul, dl, now
 
-            # per-connection speeds
-            conn_speeds = {}
+            speeds = {}
             for c in conns:
                 cid = c.get("id", "")
-                dl_cur = c.get("download", 0)
-                ul_cur = c.get("upload", 0)
-                if cid in prev_conn_state:
-                    pd, pu = prev_conn_state[cid]
-                    conn_speeds[cid] = (
-                        max(0, int((dl_cur - pd) / elapsed)),
-                        max(0, int((ul_cur - pu) / elapsed)),
-                    )
+                dc, uc = c.get("download", 0), c.get("upload", 0)
+                if cid in prev_state:
+                    pd, pu = prev_state[cid]
+                    speeds[cid] = (max(0, int((dc - pd) / elapsed)), max(0, int((uc - pu) / elapsed)))
                 else:
-                    conn_speeds[cid] = (0, 0)
-                prev_conn_state[cid] = (dl_cur, ul_cur)
-            active_ids = {c.get("id", "") for c in conns}
-            prev_conn_state = {k: v for k, v in prev_conn_state.items() if k in active_ids}
+                    speeds[cid] = (0, 0)
+                prev_state[cid] = (dc, uc)
+            active = {c.get("id", "") for c in conns}
+            prev_state = {k: v for k, v in prev_state.items() if k in active}
 
-            sorted_conns = sorted(
-                conns,
-                key=lambda c: conn_speeds.get(c.get("id", ""), (0, 0))[0],
-                reverse=True,
-            )[:20]
+            sorted_conns = sorted(conns, key=lambda c: speeds.get(c.get("id", ""), (0, 0))[0], reverse=True)[:26]
 
-            group = build(ts, sorted_conns, conn_speeds, dl, ul, up_spd, dn_spd, proxies)
-            live.update(group)
+            layout = build(ts, sorted_conns, speeds, dl, ul, us, ds, proxies)
+            live.update(layout)
             time.sleep(REFRESH_S)
 
 
