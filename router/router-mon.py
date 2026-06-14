@@ -132,23 +132,27 @@ def run(stdscr):
 
             stdscr.addstr(row,1,f"CONNS ({len(sc)})",fp)
             row+=1
-            for c in sc[:18]:
+            # draw connections (max 16, stop before legend row)
+            max_conn_row = H - 5
+            for n, c in enumerate(sc[:16]):
+                if row >= max_conn_row: break
                 meta=c.get("metadata",{}); cid=c.get("id","")
                 dst=meta.get("host","") or meta.get("destinationIP","?")
                 port=meta.get("destinationPort","")
                 ds2,us2=speeds.get(cid,(0,0))
                 dl2=fs(ds2) if ds2>0 else "    -"; ul2=fs(us2) if us2>0 else "    -"
                 sym,clr_pair=rs(c.get("chains",[]))
-                if row>=H-1: break
                 stdscr.addstr(row,1,f" {sym} ",curses.color_pair(clr_pair)|fp)
                 stdscr.addstr(row,3,f"{(dst+':'+(port or ''))[:22].ljust(22)} {dl2:>8} {ul2:>8}")
                 row+=1
-            # legend
-            if row<H-3:
-                row+=1
-                stdscr.addstr(row,1,"P=Proxy",curses.color_pair(5))
-                stdscr.addstr(row,10,"D=Direct",curses.color_pair(2))
-                stdscr.addstr(row,20,"R=Reject",curses.color_pair(1))
+            # clear leftover connection rows from previous frame
+            for y in range(row, max_conn_row):
+                stdscr.move(y,0); stdscr.clrtoeol()
+            # legend at fixed position
+            stdscr.move(H-5,0); stdscr.clrtoeol()
+            stdscr.addstr(H-5, 1, "P=Proxy", curses.color_pair(5))
+            stdscr.addstr(H-5, 14, "D=Direct", curses.color_pair(2))
+            stdscr.addstr(H-5, 27, "R=Reject", curses.color_pair(1))
 
             # RIGHT PANEL — Arch logo (blue) then system info
             ARCH = [
