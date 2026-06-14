@@ -85,7 +85,7 @@ def run(stdscr):
 
             # fastfetch (with native Arch logo)
             try:
-                raw=subprocess.run(["fastfetch","--logo-type","small","--pipe"],
+                raw=subprocess.run(["fastfetch","--logo","none","--pipe"],
                     capture_output=True,text=True,timeout=2).stdout
                 ff_lines=raw.split("\n")
             except: ff_lines=[]
@@ -113,9 +113,9 @@ def run(stdscr):
             # LEFT PANEL
             # Speed
             sca=max(us,ds,1); uw=int(min(us/sca*18,18)); dw=int(min(ds/sca*18,18))
-            stdscr.addstr(row,1,f"UP  {'#'*uw}{' '*(18-uw)} {fs(us).rjust(10)}",curses.color_pair(6)|fp)
+            stdscr.addstr(row,1,f"UP  {'#'*uw}{' '*(18-uw)} {fs(us).rjust(9)}",curses.A_BOLD)
             row+=1
-            stdscr.addstr(row,1,f"DN  {'#'*dw}{' '*(18-dw)} {fs(ds).rjust(10)}",curses.color_pair(4)|fp)
+            stdscr.addstr(row,1,f"DN  {'#'*dw}{' '*(18-dw)} {fs(ds).rjust(9)}",curses.A_BOLD)
             row+=2
 
             stdscr.addstr(row,1,f"Up:{fb(ul)} Dn:{fb(dl)} Conns:{len(sc)}")
@@ -140,7 +140,7 @@ def run(stdscr):
                 sym,clr_pair=rs(c.get("rule",""))
                 if row>=H-1: break
                 stdscr.addstr(row,1,f" {sym} ",curses.color_pair(clr_pair)|fp)
-                stdscr.addstr(row,3,f"{(dst+':'+(port or ''))[:22].ljust(22)} {dl2} {ul2}")
+                stdscr.addstr(row,3,f"{(dst+':'+(port or ''))[:22].ljust(22)} {dl2:>8} {ul2:>8}")
                 row+=1
             # legend
             if row<H-3:
@@ -149,8 +149,21 @@ def run(stdscr):
                 stdscr.addstr(row,10,"D=Direct",curses.color_pair(2))
                 stdscr.addstr(row,20,"R=Reject",curses.color_pair(1))
 
-            # RIGHT PANEL — fastfetch (native logo included)
+            # RIGHT PANEL — Arch logo (blue) then system info
+            ARCH = [
+                "      /\\",
+                "     /  \\",
+                "    /    \\",
+                "   /      \\",
+                "  /   ,,   \\",
+                " /   |  |   \\",
+                "/_-''    ''-_\\",
+            ]
             rr=2
+            for line in ARCH:
+                if rr<H-1: stdscr.addstr(rr, MW+3, line, curses.color_pair(6)|curses.A_BOLD)
+                rr+=1
+            rr+=1  # blank line
             shown=0
             for line in ff_lines:
                 ls=line.strip()
@@ -159,7 +172,7 @@ def run(stdscr):
                 if ls.replace("-","")=="": continue
                 if "Locale: C" in ls: continue
                 if "\033[4" in line or "\033[10" in line: continue
-                if shown>=24: break
+                if shown>=18: break
                 if rr>=H-3: break
                 stdscr.addstr(rr, MW+1, line[:MW-2])
                 rr+=1; shown+=1
