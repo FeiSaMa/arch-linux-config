@@ -43,10 +43,11 @@ def fs(bps):
     v/=1000
     return f"{v:4.1f}M/s"
 
-def rs(rule):
-    u=(rule or "").upper()
-    if "DIRECT" in u: return "D", 2  # green
-    if "REJECT" in u: return "R", 1  # red
+def rs(chains):
+    if not chains: return "P", 5
+    first = chains[0]
+    if "DIRECT" in first.upper(): return "D", 2  # green
+    if "REJECT" in first.upper(): return "R", 1  # red
     return "P", 5  # magenta
 
 def run(stdscr):
@@ -137,7 +138,7 @@ def run(stdscr):
                 port=meta.get("destinationPort","")
                 ds2,us2=speeds.get(cid,(0,0))
                 dl2=fs(ds2) if ds2>0 else "    -"; ul2=fs(us2) if us2>0 else "    -"
-                sym,clr_pair=rs(c.get("rule",""))
+                sym,clr_pair=rs(c.get("chains",[]))
                 if row>=H-1: break
                 stdscr.addstr(row,1,f" {sym} ",curses.color_pair(clr_pair)|fp)
                 stdscr.addstr(row,3,f"{(dst+':'+(port or ''))[:22].ljust(22)} {dl2:>8} {ul2:>8}")
