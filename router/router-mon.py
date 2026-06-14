@@ -1,214 +1,182 @@
 #!/usr/bin/env python3
 """
-T14 Router Monitor — Full-screen Dashboard
-Layout for full-height, explicit Text() styles for TTY compat.
+T14 Router Monitor — 38-row full-screen (ter-228b 60x38)
+Manual line control, no Layout, no markup, no gaps.
 """
 
-import json
-import time
-import sys
+import json, time, sys
 from datetime import datetime
 from urllib.request import urlopen, Request
-
-from rich.console import Console
-from rich.layout import Layout
+from rich.console import Console, Group
 from rich.live import Live
 from rich.text import Text
-from rich.align import Align
-from rich import box
 
-API_BASE = "http://127.0.0.1:9097"
-SECRET = "20080201"
-REFRESH_S = 1
+API  = "http://127.0.0.1:9097"
+KEY  = "20080201"
+FPS  = 1
+ROWS = 38  # ter-228b on 1080p
 
-# --- Styles ---
-S_BOLD, S_DIM, S_WHITE, S_YELLOW, S_RED = "bold", "bright_black", "white", "yellow", "red"
-S_CYAN, S_B_CYAN, S_BLUE, S_B_BLUE, S_MAGENTA, S_GREEN = (
-    "cyan", "bold cyan", "blue", "bold blue", "magenta", "green")
+# -- ANSI-safe styles --
+B="bold"; D="bright_black"; W="white"
+C="cyan"; BC="bold cyan"; BL="blue"; BB="bold blue"
+Y="yellow"; R="red"; M="magenta"; G="green"
 
-# --- API ---
-
-def fetch_json(endpoint):
-    url = f"{API_BASE}{endpoint}"
-    req = Request(url, headers={"Authorization": f"Bearer {SECRET}"})
+# -- helpers --
+def api(endpoint):
     try:
-        with urlopen(req, timeout=3) as resp:
-            return json.loads(resp.read().decode())
-    except Exception:
-        return None
+        req = Request(f"{API}{endpoint}", headers={"Authorization": f"Bearer {KEY}"})
+        with urlopen(req, timeout=3) as r: return json.loads(r.read().decode())
+    except: return None
 
-def fetch_conns():
-    data = fetch_json("/connections")
-    if not data:
-        return [], 0, 0
-    return data.get("connections", []), data.get("downloadTotal", 0), data.get("uploadTotal", 0)
+def get_conns():
+    d = api("/connections")
+    if not d: return [], 0, 0
+    return d.get("connections",[]), d.get("downloadTotal",0), d.get("uploadTotal",0)
 
-def fetch_proxies():
-    data = fetch_json("/proxies")
-    if not data:
-        return {}
-    info = {}
-    for name, p in data.get("proxies", {}).items():
-        if p.get("type") == "Selector":
-            now = p.get("now", "?")
-            hist = p.get("history", [])
-            delay = f"{hist[-1].get('delay',0)}ms" if hist else "?"
-            info[name] = (now, delay)
-    return info
+def get_proxies():
+    d = api("/proxies")
+    if not d: return {}
+    return {n: (p.get("now","?"), f"{p['history'][-1]['delay']}ms" if p.get("history") else "?")
+            for n,p in d.get("proxies",{}).items() if p.get("type")=="Selector"}
 
-def fmt_bytes(n):
-    if n < 1024: return f"{n}B"
-    for u in ("K","M","G"):
-        n/=1024
-        if n<1024: return f"{n:.0f}{u}"
-    return f"{n:.0f}G"
+def fb(n):
+    if not n or n<1024: return f"{n or 0}B"
+    n/=1024
+    if n<1024: return f"{n:.0f}K"
+    n/=1024
+    if n<1024: return f"{n:.1f}M"
+    return f"{n/1024:.1f}G"
 
-def fmt_spd(bps):
-    if bps < 1000: return f"{bps:.0f}B/s"
-    bps/=1000
-    if bps<1000: return f"{bps:.0f}K/s"
-    bps/=1000; return f"{bps:.1f}M/s"
+def fs(bps):
+    v = max(0, int(bps or 0))
+    if v < 1000:    return f"{v:.0f} B/s"
+    v /= 1000
+    if v < 1000:    return f"{v:.0f}K/s"
+    v /= 1000
+    return          f"{v:.1f}M/s"
 
-def rstyle(rule):
+def rs(rule):
     u = (rule or "").upper()
-    if "DIRECT" in u: return "D", S_GREEN
-    if "REJECT" in u: return "R", S_RED
-    return "P", S_MAGENTA
+    if "DIRECT" in u: return "D", G
+    if "REJECT" in u: return "R", R
+    return "P", M
 
-# --- Layout ---
+D60 = Text("─" * 60, style=D)  # divider
+
+# -- line builders --
+def H(ts):
+    t = Text(); t.append("T14  ROUTER  MONITOR", B); t.append(" " * 22, D); t.append(ts, D)
+    return t
+
+def S(us, ds, sc):
+    mw = 22; uw = int(min(us/sc*mw, mw)); dw = int(min(ds/sc*mw, mw))
+    u = Text(); u.append("UP  ", BC); u.append("#"*uw, C); u.append(" "*(mw-uw) + " ", D)
+    u.append(fs(us), BC)
+    d = Text(); d.append("DN  ", BB); d.append("#"*dw, BL); d.append(" "*(mw-dw) + " ", D)
+    d.append(fs(ds), BB)
+    return u, d
+
+def C(c, speeds):
+    meta = c.get("metadata", {})
+    cid  = c.get("id", "")
+    dst  = meta.get("host","") or meta.get("destinationIP","?")
+    port = meta.get("destinationPort","")
+    ds, us = speeds.get(cid, (0, 0))
+    dl = fs(ds) if ds > 0 else "      -"
+    ul = fs(us) if us > 0 else "      -"
+    sym, clr = rs(c.get("rule",""))
+    t = Text()
+    t.append(f"{sym} ", clr)
+    t.append(f"{(dst + ':' + (port or ''))[:30].ljust(30)}", W)
+    t.append(f"  {dl.rjust(7)}", clr)
+    t.append(f"  {ul.rjust(7)}", D)
+    return t
 
 def build(ts, conns, speeds, dl, ul, us, ds, proxies):
-    layout = Layout()
+    rows = []
+    sc = max(us, ds, 1)
 
-    # Build left panel text
-    left = Text()
+    rows.append(H(ts))                  # 1
+    rows.append(D60)                     # 2
+    rows.extend(S(us, ds, sc))          # 3-4
+    rows.append(Text(""))               # 5
 
-    # UP bar
-    scale = max(us, ds, 1)
-    up_w = int(min(us / scale * 22, 22))
-    left.append(Text("UP\n", style=S_B_CYAN))
-    left.append(Text("#" * up_w + " " * (22 - up_w), style=S_CYAN))
-    left.append(Text(f"\n{fmt_spd(us)}\n\n", style=S_B_CYAN))
+    tot = Text()
+    tot.append(f"TOTAL  Up:{fb(ul).rjust(8)}", C)
+    tot.append(f"  Dn:{fb(dl).rjust(8)}", BL)
+    tot.append(f"  Conns:{len(conns)}", Y)
+    rows.append(tot)                    # 6
 
-    # DOWN bar
-    dn_w = int(min(ds / scale * 22, 22))
-    left.append(Text("DOWN\n", style=S_B_BLUE))
-    left.append(Text("#" * dn_w + " " * (22 - dn_w), style=S_BLUE))
-    left.append(Text(f"\n{fmt_spd(ds)}\n\n", style=S_B_BLUE))
-
-    # Totals
-    left.append(Text("TOTAL\n", style=S_BOLD))
-    left.append(Text(f"Up  {fmt_bytes(ul)}\n", style=S_CYAN))
-    left.append(Text(f"Dn  {fmt_bytes(dl)}\n", style=S_BLUE))
-    left.append(Text(f"Conns {len(conns)}\n\n", style=S_YELLOW))
-
-    # Node
     if proxies:
-        first = list(proxies.items())[0]
-        name, (now, delay) = first
-        left.append(Text("NODE\n", style=S_BOLD))
-        left.append(Text(f"{now[:16]}\n", style=S_WHITE))
-        left.append(Text(f"{delay}", style=S_YELLOW))
+        pn = list(proxies.items())[0]
+        nd = Text()
+        nd.append(f"NODE   {pn[1][0][:26]}", W)
+        nd.append(f"  {pn[1][1]}", Y)
+        rows.append(nd)                 # 7
+    else:
+        rows.append(Text("NODE   --", D))
 
-    # Build connection list text
-    conn_text = Text()
+    rows.append(D60)                     # 8
 
-    for c in conns[:26]:
-        meta = c.get("metadata", {})
-        cid = c.get("id", "")
-        dst = meta.get("host", "") or meta.get("destinationIP", "?")
-        port = meta.get("destinationPort", "")
-        dl_s, ul_s = speeds.get(cid, (0, 0))
-        dl_t = fmt_spd(dl_s) if dl_s > 0 else "-"
-        ul_t = fmt_spd(ul_s) if ul_s > 0 else "-"
-        sym, clr = rstyle(c.get("rule", ""))
+    th = Text()
+    th.append(f"CONNECTIONS ({len(conns)})", B)
+    th.append(" " * 35, D)
+    th.append("  DOWN      UP", D)
+    rows.append(th)                     # 9
 
-        line = Text()
-        line.append(sym + " ", style=clr)
-        line.append(f"{(dst+':'+port)[:26].ljust(26)}", style=S_WHITE)
-        dl_t_pad = dl_t.rjust(8)
-        ul_t_pad = ul_t.rjust(8)
-        line.append(dl_t_pad, style=clr)
-        line.append(" ")
-        line.append(ul_t_pad, style=S_DIM)
-        line.append("\n")
-        conn_text.append(line)
+    shown = conns[:24]
+    for c in shown:
+        rows.append(C(c, speeds))       # 10-33
+    for _ in range(24 - len(shown)):
+        rows.append(Text(""))
 
-    # Legend
-    conn_text.append(Text(f"\n", style=S_DIM))
-    conn_text.append(Text("P=Proxy", style=S_MAGENTA))
-    conn_text.append(Text(" D=Direct", style=S_GREEN))
-    conn_text.append(Text(" R=Reject", style=S_RED))
+    lg = Text()
+    lg.append(" P=Proxy", M)
+    lg.append("  D=Direct", G)
+    lg.append("  R=Reject", R)
+    rows.append(lg)                      # 34
 
-    # Bottom bar
-    bot = Text()
-    bot.append(Text("q quit", style=S_RED))
+    rows.append(D60)                     # 35
+
+    ft = Text()
+    ft.append("q quit", R)
     if proxies:
-        name, (now, delay) = list(proxies.items())[0]
-        bot.append(Text(f"  |  {now[:14]}", style=S_WHITE))
-    bot.append(Text(f"  |  UP {fmt_spd(us)}", style=S_B_CYAN))
-    bot.append(Text(f"  DN {fmt_spd(ds)}", style=S_B_BLUE))
+        ft.append(f"  |  {pn[1][0][:20]}", W)
+    ft.append(f"  |  UP {fs(us)}", BC)
+    ft.append(f"  DN {fs(ds)}", BB)
+    rows.append(ft)                     # 36
 
-    # Placeholders with explicit text
-    hdr = Text()
-    hdr.append("T14 ROUTER MONITOR", style=S_BOLD)
-    hdr.append(f"    {ts}", style=S_DIM)
+    rows.append(Text(""))               # 37
+    rows.append(Text(""))               # 38
 
-    layout.split(
-        Layout(Align.center(hdr), name="h", size=1),
-        Layout(name="m"),
-        Layout(name="b", size=1),
-    )
-    layout["m"].split_row(
-        Layout(left, name="l", ratio=2),
-        Layout(conn_text, name="r", ratio=3),
-    )
-    layout["b"].update(Align.center(bot))
+    return Group(*rows)
 
-    return layout
-
-
-# --- Main ---
-
+# -- main --
 def run():
     console = Console()
-    prev_ul = prev_dl = 0
-    prev_ts = time.time()
-    prev_state = {}
-
-    with Live(console=console, refresh_per_second=REFRESH_S, screen=True) as live:
+    pu = pd = 0; pt = time.time(); ps = {}
+    with Live(console=console, refresh_per_second=FPS, screen=True) as live:
         while True:
             now = time.time()
             ts = datetime.now().strftime("%H:%M:%S")
-            conns, dl, ul = fetch_conns()
-            proxies = fetch_proxies()
-            elapsed = max(now - prev_ts, 0.1)
-            us = max(0, int((ul - prev_ul) / elapsed))
-            ds = max(0, int((dl - prev_dl) / elapsed))
-            prev_ul, prev_dl, prev_ts = ul, dl, now
-
+            conns, dl, ul = get_conns()
+            proxies = get_proxies()
+            ela = max(now - pt, 0.1)
+            us = max(0, int(((ul or 0) - pu) / ela))
+            ds = max(0, int(((dl or 0) - pd) / ela))
+            pu, pd, pt = ul or 0, dl or 0, now
             speeds = {}
             for c in conns:
-                cid = c.get("id", "")
-                dc, uc = c.get("download", 0), c.get("upload", 0)
-                if cid in prev_state:
-                    pd, pu = prev_state[cid]
-                    speeds[cid] = (max(0, int((dc - pd) / elapsed)), max(0, int((uc - pu) / elapsed)))
-                else:
-                    speeds[cid] = (0, 0)
-                prev_state[cid] = (dc, uc)
-            active = {c.get("id", "") for c in conns}
-            prev_state = {k: v for k, v in prev_state.items() if k in active}
-
-            sorted_conns = sorted(conns, key=lambda c: speeds.get(c.get("id", ""), (0, 0))[0], reverse=True)[:26]
-
-            layout = build(ts, sorted_conns, speeds, dl, ul, us, ds, proxies)
-            live.update(layout)
-            time.sleep(REFRESH_S)
-
+                cid = c.get("id", ""); dc, uc = c.get("download",0), c.get("upload",0)
+                if cid in ps:
+                    od, ou = ps[cid]; speeds[cid] = (max(0,int((dc-od)/ela)), max(0,int((uc-ou)/ela)))
+                else: speeds[cid] = (0, 0)
+                ps[cid] = (dc, uc)
+            ps = {k:v for k,v in ps.items() if k in {c.get("id","") for c in conns}}
+            sc = sorted(conns, key=lambda c: speeds.get(c.get("id",""),(0,0))[0], reverse=True)
+            live.update(build(ts, sc, speeds, dl, ul, us, ds, proxies))
+            time.sleep(FPS)
 
 if __name__ == "__main__":
-    try:
-        run()
-    except KeyboardInterrupt:
-        sys.exit(0)
+    try: run()
+    except KeyboardInterrupt: sys.exit(0)
