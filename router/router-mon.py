@@ -107,7 +107,7 @@ def build(time_str, conns_sorted, dl_total, ul_total, up_spd, dn_spd, proxies):
     layout.split(
         Layout(name="top", size=3),
         Layout(name="mid"),
-        Layout(name="bot", size=3),
+        Layout(name="bot", size=1),
     )
     layout["mid"].split_row(
         Layout(name="left", ratio=2),
@@ -120,44 +120,54 @@ def build(time_str, conns_sorted, dl_total, ul_total, up_spd, dn_spd, proxies):
     top_txt.append(f"  [dim]{time_str}[/]")
     layout["top"].update(Panel(Align.center(top_txt), style=BORDER, box=box.HEAVY))
 
-    # left: speed + totals + nodes
+    # left: BIG speed display
     left = Text()
-    # speed bars (15 chars max)
+    # UP bar — full width using color blocks
     scale = max(up_spd, dn_spd, 1)
-    bar_up = "#" * int(min(up_spd / scale * 13, 13))
-    bar_dn = "#" * int(min(dn_spd / scale * 13, 13))
-    left.append("[bold cyan]UP[/]\n")
-    left.append(f"[cyan]{bar_up}[/] [bold]{fmt_spd(up_spd)}[/]\n\n")
-    left.append("[bold blue]DOWN[/]\n")
-    left.append(f"[blue]{bar_dn}[/] [bold]{fmt_spd(dn_spd)}[/]\n\n")
+    up_w = int(min(up_spd / scale * 22, 22))
+    dn_w = int(min(dn_spd / scale * 22, 22))
+    up_bar = "#" * up_w
+    dn_bar = "#" * dn_w
+    # right-pad bars to 22
+    up_bar_pad = up_bar.ljust(22)
+    dn_bar_pad = dn_bar.ljust(22)
+
+    left.append(f"[bold cyan]UP[/] [dim]──────────────────[/]\n")
+    left.append(f"[bold cyan on cyan]{up_bar_pad}[/]\n")
+    left.append(f"[bold cyan]{fmt_spd(up_spd).rjust(10)}[/]\n\n")
+
+    left.append(f"[bold blue]DOWN[/] [dim]────────────────[/]\n")
+    left.append(f"[bold blue on blue]{dn_bar_pad}[/]\n")
+    left.append(f"[bold blue]{fmt_spd(dn_spd).rjust(10)}[/]\n\n")
+
     left.append("[bold]TOTAL[/]\n")
-    left.append(f"[cyan]Up[/]  {fmt_bytes(ul_total)}\n")
-    left.append(f"[blue]Dn[/]  {fmt_bytes(dl_total)}\n")
+    left.append(f"[cyan]Up[/]  {fmt_bytes(ul_total).rjust(8)}\n")
+    left.append(f"[blue]Dn[/]  {fmt_bytes(dl_total).rjust(8)}\n")
     left.append(f"[{YELLOW}]Conns[/] {len(conns_sorted)}\n\n")
-    left.append("[bold]NODES[/]\n")
+
     if proxies:
-        for name, (now, delay) in list(proxies.items())[:5]:
-            short = name[:14]
-            left.append(f"[dim]{short}[/] → [bold]{now[:12]}[/] [{YELLOW}]{delay}[/]\n")
-    else:
-        left.append("[dim]no data[/]")
+        first = list(proxies.items())[0]
+        name, (now, delay) = first
+        left.append(f"[dim]Node[/] [bold]{now[:14]}[/] [{YELLOW}]{delay}[/]")
     layout["left"].update(Panel(left, title="[bold]NETWORK[/]", border_style=BORDER, box=box.ROUNDED))
 
     # right: connection table
     tbl = Table(box=box.SIMPLE, border_style=BORDER, expand=True, show_header=True, header_style=f"bold {DIM}")
     tbl.add_column("DESTINATION", width=28)
-    tbl.add_column("", width=2)   # rule icon
+    tbl.add_column("", width=1)
     tbl.add_column("TRAFFIC", width=9, justify="right")
 
-    for c in conns_sorted[:16]:
+    for c in conns_sorted[:18]:
         meta = c.get("metadata", {})
         dst = meta.get("host", "") or meta.get("destinationIP", "?")
         port = meta.get("destinationPort", "")
         dst_full = f"{dst}:{port}" if port else dst
-        rule = rlabel(c.get("rule", ""), c.get("rulePayload", ""))
         sym, clr = rstyle(c.get("rule", ""))
         traffic = fmt_bytes(c.get("download", 0))
         tbl.add_row(dst_full[:27], f"[bold {clr}]{sym}[/]", f"[{clr}]{traffic}[/]")
+
+    legend = Text(f"[{MAGENTA}]P[/]=Proxy [{GREEN}]D[/]=Direct [{RED}]R[/]=Reject", justify="center")
+    tbl.add_row(legend, "", Text(""))
 
     layout["right"].update(Panel(
         tbl,
@@ -165,12 +175,14 @@ def build(time_str, conns_sorted, dl_total, ul_total, up_spd, dn_spd, proxies):
         border_style=BORDER, box=box.ROUNDED,
     ))
 
-    # bottom: sparkline + controls
-    bot = Text()
-    bot.append(f"UP  [cyan]{sparkline(history_up, 18)}[/] [bold cyan]{fmt_spd(up_spd)}[/]  ")
-    bot.append(f"DOWN [blue]{sparkline(history_dn, 18)}[/] [bold blue]{fmt_spd(dn_spd)}[/]  ")
-    bot.append(f" [{RED}]q[/] quit")
-    layout["bot"].update(Panel(bot, style=BORDER, box=box.HEAVY))
+    # bottom: compact status bar
+    bot = Text(justify="center")
+    bot.append(f"[{RED}]q[/]quit  │  ")
+    if proxies:
+        cnt = len(proxies)
+        bot.append(f"{cnt} nodes  │  ")
+    bot.append(f"[bold cyan]↑[/]{fmt_spd(up_spd)}  [bold blue]↓[/]{fmt_spd(dn_spd)}")
+    layout["bot"].update(Align.center(bot))
 
     return layout
 
