@@ -153,9 +153,10 @@ def build(time_str, conns_sorted, dl_total, ul_total, up_spd, dn_spd, proxies):
 
     # right: connection table
     tbl = Table(box=box.SIMPLE, border_style=BORDER, expand=True, show_header=True, header_style=f"bold {DIM}")
-    tbl.add_column("DESTINATION", width=28)
+    tbl.add_column("DESTINATION", width=24)
     tbl.add_column("", width=1)
-    tbl.add_column("TRAFFIC", width=9, justify="right")
+    tbl.add_column("DOWN", width=7, justify="right")
+    tbl.add_column("UP", width=7, justify="right")
 
     for c in conns_sorted[:18]:
         meta = c.get("metadata", {})
@@ -163,11 +164,17 @@ def build(time_str, conns_sorted, dl_total, ul_total, up_spd, dn_spd, proxies):
         port = meta.get("destinationPort", "")
         dst_full = f"{dst}:{port}" if port else dst
         sym, clr = rstyle(c.get("rule", ""))
-        traffic = fmt_bytes(c.get("download", 0))
-        tbl.add_row(dst_full[:27], f"[bold {clr}]{sym}[/]", f"[{clr}]{traffic}[/]")
+        dl_traffic = fmt_bytes(c.get("download", 0))
+        ul_traffic = fmt_bytes(c.get("upload", 0))
+        tbl.add_row(
+            dst_full[:23],
+            f"[bold {clr}]{sym}[/]",
+            f"[{clr}]{dl_traffic}[/]",
+            f"[dim]{ul_traffic}[/]",
+        )
 
     legend = Text(f"[{MAGENTA}]P[/]=Proxy [{GREEN}]D[/]=Direct [{RED}]R[/]=Reject", justify="center")
-    tbl.add_row(legend, "", Text(""))
+    tbl.add_row(legend, "", Text(""), Text(""))
 
     layout["right"].update(Panel(
         tbl,
