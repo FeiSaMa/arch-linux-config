@@ -1,0 +1,13 @@
+[Unit]
+Description=Assign IP to WiFi LAN interface
+After=sys-subsystem-net-devices-wlp0s20f3.device
+BindsTo=sys-subsystem-net-devices-wlp0s20f3.device
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ip addr replace 192.168.2.1/24 dev wlp0s20f3
+ExecStop=/usr/bin/ip addr del 192.168.2.1/24 dev wlp0s20f3
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

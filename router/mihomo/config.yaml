@@ -1,4 +1,5 @@
 # mihomo config for T14 Gen1 Router
+# NOTE: GEOIP rule removed — MMDB download blocked in China, try scp from proxy machine if needed
 port: 7899
 socks-port: 7898
 mixed-port: 7897
@@ -30,7 +31,6 @@ dns:
   nameserver:
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
-  fallback: []
   fake-ip-filter:
     - '*.lan'
     - '*.local'
@@ -62,8 +62,15 @@ proxy-groups:
     type: url-test
     url: http://www.gstatic.com/generate_204
     interval: 300
+    tolerance: 150
     use:
       - iGG
 
 rules:
-  - MATCH,🔰 节点选择
+  - IP-CIDR,198.18.0.1/16,DIRECT,no-resolve
+  - IP-CIDR,223.5.5.5/32,DIRECT
+  - IP-CIDR,114.114.114.114/32,DIRECT
+  - GEOSITE,category-ads-all,REJECT
+  - GEOSITE,cn,DIRECT
+  - GEOSITE,geolocation-!cn,🔰 节点选择
+  - MATCH,DIRECT
