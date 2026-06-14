@@ -52,7 +52,6 @@ def rs(rule):
 def pad(s,n): return (s or "")[:n].ljust(n)
 
 def run():
-    import os; os.system("sudo setfont -C /dev/tty2 ter-132b 2>/dev/null")
     pu=pd=0; pt=time.time(); ps={}; ff_lines=[""]*ROWS
     last_ff=0
 
