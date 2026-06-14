@@ -133,12 +133,11 @@ def run(stdscr):
 
             # Column dividers
             for y in range(H):
-                try: stdscr.addch(y,MW-1,curses.ACS_VLINE)
-                except: pass
+                stdscr.addch(y,MW-1,ord('|'))
 
             # Divider line
-            stdscr.hline(1,0,curses.ACS_HLINE,W)
-            stdscr.addch(1,MW-1,curses.ACS_PLUS)
+            stdscr.hline(1,0,ord('-'),W)
+            stdscr.addch(1,MW-1,ord('+'))
 
             row=2
 
@@ -157,8 +156,8 @@ def run(stdscr):
             stdscr.addstr(row, 1, f"Node {pp[0]} {pp[1]}")
             row+=1
 
-            stdscr.hline(row,0,curses.ACS_HLINE,MW-1)
-            stdscr.addch(row,MW-1,curses.ACS_PLUS)
+            stdscr.hline(row,0,ord('-'),MW-1)
+            stdscr.addch(row,MW-1,ord('+'))
             row+=1
 
             stdscr.addstr(row,1,f"CONNS ({len(sc)})",fp)
@@ -214,8 +213,8 @@ def run(stdscr):
                 rr+=1; shown+=1
 
             # Bottom bar
-            stdscr.hline(H-2,0,curses.ACS_HLINE,W)
-            stdscr.addch(H-2,MW-1,curses.ACS_PLUS)
+            stdscr.hline(H-2,0,ord('-'),W)
+            stdscr.addch(H-2,MW-1,ord('+'))
             nd2 = proxies[0][0][:14] if proxies else "--"
             stdscr.move(H-1,0); stdscr.clrtoeol()
             footer = f"q quit | {nd2} | UP {fs(us)} DN {fs(ds)}"
