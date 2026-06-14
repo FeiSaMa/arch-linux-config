@@ -182,7 +182,9 @@ def run(stdscr):
             stdscr.hline(H-2,0,curses.ACS_HLINE,W)
             stdscr.addch(H-2,MW-1,curses.ACS_PLUS)
             nd2=pn[0][1][0][:14] if pn else "--"
-            stdscr.addstr(H-1,1,f"q quit | {nd2} | UP {fs(us)} DN {fs(ds)}",fp)
+            stdscr.move(H-1,0); stdscr.clrtoeol()
+            footer = f"q quit | {nd2} | UP {fs(us)} DN {fs(ds)}"
+            stdscr.addstr(H-1, max(1, (W-len(footer))//2), footer, fp)
 
             stdscr.refresh()
             time.sleep(FPS)
