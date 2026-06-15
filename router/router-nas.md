@@ -38,12 +38,22 @@ workgroup = WORKGROUP
 server string = T14 Router NAS
 security = user
 map to guest = never
+server min protocol = SMB2_02
+ea support = yes
+vfs objects = catia fruit streams_xattr
+fruit:metadata = stream
+fruit:model = MacSamba
 
 [share]
 path = /srv/nas/share
 valid users = feisama
 read only = no
 browsable = yes
+writable = yes
+create mask = 0644
+directory mask = 0755
+force user = feisama
+force group = feisama
 ```
 
 ### 设计决策
@@ -54,6 +64,9 @@ browsable = yes
 | `map to guest = never` | 禁止匿名 | 未认证直接拒绝 |
 | `valid users = feisama` | 单用户 | 只用路由器上的现有系统用户 |
 | 无防火墙改动 | `iif wlp0s20f3 accept` | 现有规则已全部放行 LAN |
+| `vfs objects = catia fruit` | Apple SMB 扩展 | iOS/iPadOS 文件操作必需 |
+| `ea support = yes` | 扩展属性 | iOS 创建文件夹时写入元数据 |
+| `server min protocol = SMB2_02` | SMB2+ | iOS 要求的最低协议版本 |
 
 ## 服务状态
 
