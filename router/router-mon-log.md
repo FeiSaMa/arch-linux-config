@@ -124,3 +124,41 @@ WiFi IP:        192.168.2.1        ✅
 net.ipv4.ip_forward = 1           ✅
 Font:           120×33 (ter-132b)  ✅
 ```
+
+---
+
+## 2026-06-15 NAS 配置 + 5GHz 尝试期间引发的问题
+
+### 13. router-mon 报错 TypeError: 'NoneType' object is not iterable
+
+- **现象**: 监控面板顶部条报错，左右面板空白
+- **位置**: `router-mon.py` line 129 `for c in conns:`
+- **根因**: Mihomo API `/connections` 偶尔返回 `{"connections": null}`。`d.get("connections", [])` 在 key 存在但值为 `null` 时返回 `None` 而非默认值 `[]`
+- **修复**: `d.get("connections", [])` → `d.get("connections") or []`
+
+### 14. nftables 规则 ifindex 过期 — LAN 全断
+
+- **现象**: iPad 连上 WiFi（WPA 握手成功）但拿不到 IP，反复连上→断开
+- **根因**: 5GHz 解锁过程多次 `modprobe -r`→`modprobe` 重载 WiFi 模块，`wlp0s20f3` 接口被销毁并重新创建，ifindex 从 3 变为 13。nftables 规则缓存的是旧 ifindex（`iif 3`），导致 `chain input iif 3 accept` 不匹配新接口，所有 LAN 入站流量（含 DHCP）被 `policy drop` 丢弃
+- **附带故障**: `wifi-lan-ip.service` 在模块卸载期间尝试 `ip addr del`，但此时 `wlp0s20f3` 不存在，报错 `Cannot find device`，服务进入 failed 状态，IP 未重新分配
+- **修复**:
+  ```bash
+  sudo nft -f /etc/nftables.conf           # 按名称重新加载，不再用数字 ifindex
+  sudo ip addr replace 192.168.2.1/24 dev wlp0s20f3  # 手动恢复 IP
+  sudo systemctl reset-failed wifi-lan-ip  # 清除失败状态
+  sudo systemctl restart wifi-lan-ip dnsmasq
+  ```
+- **教训**: nftables 配置文件中接口应始终用名称（`wlp0s20f3`）而非数字索引（`3`）。当前 `/etc/nftables.conf` 已使用名称，问题出在运行时缓存的旧规则。未来若需重载模块，务必同时 `nft -f /etc/nftables.conf`。
+
+### 15. 5GHz AP 模式解锁失败 — Intel CNVi 固件硬限制
+
+- **尝试过的手段**:
+  - `cfg80211.ieee80211_regdom=CN` 内核参数（通过 `/etc/kernel/cmdline` + UKI 重建）
+  - `iw reg set CN`
+  - 安装 `wireless-regdb`（提供 `regulatory.db`）
+  - 移除 `ieee80211d=1 country_code=CN`（避免触发 COUNTRY_UPDATE 重检）
+  - 换信道 36/149/各种组合
+- **结果**: 全部失败。`iw list` 显示通用信道无 `(no IR)`，但 hostapd 通过 nl80211 查询 AP 模式信道时，iwlwifi 固件对所有 5GHz 信道统一返回 `NO_IR`
+- **根因**: Intel CNVi WiFi (8086:02f0, iwlwifi 自管 regulatory 模式) 的固件层面硬编码 5GHz AP 禁止。不由 kernel regdomain 或 hostapd 配置控制的
+- **结论**: T14 Gen1 内置 WiFi 仅支持 2.4GHz 802.11n 20MHz AP 模式（130 Mbps 上限）。需外接 USB 5GHz 网卡（推荐 MT7612U 芯片）才能解锁 5GHz
+- **Samba 速度影响**: 2.4GHz 130 Mbps → 实际 SMB 4-6 MB/s。5GHz 867 Mbps → 预期 80+ MB/s

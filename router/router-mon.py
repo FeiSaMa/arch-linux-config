@@ -42,7 +42,7 @@ def api(endpoint):
 def get_conns():
     d=api("/connections")
     if not d: return [],0,0
-    return d.get("connections",[]), d.get("downloadTotal",0), d.get("uploadTotal",0)
+    return d.get("connections") or [], d.get("downloadTotal",0), d.get("uploadTotal",0)
 
 def get_proxies():
     d=api("/proxies")

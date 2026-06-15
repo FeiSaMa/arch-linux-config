@@ -113,3 +113,35 @@ pkexec mount -t cifs //192.168.2.1/share ~/NAS -o username=feisama,password=2008
 - [ ] 收紧 LAN 防火墙规则（仅开放必要端口）
 - [ ] 空间告警（磁盘使用率监控/通知）
 - [ ] 性能影响评估（Samba 对 WiFi AP 频段和 CPU 的负载）
+
+## WiFi 性能瓶颈（2026-06-15）
+
+| 项 | 当前值 | 影响 |
+|---|--------|------|
+| WiFi 标准 | 802.11n, 2.4GHz, 20 MHz | 单客户端最大 130 Mbps |
+| 5GHz AP | **不支持** | Intel CNVi (8086:02f0) 固件硬限制，所有 5GHz 信道 nl80211 AP 查询返回 `NO_IR` |
+| Samba 实测 | 4-6 MB/s | 130 Mbps × 半双工 WiFi × SMB 协议开销 |
+
+### 5GHz 解锁尝试
+
+| 尝试 | 结果 |
+|------|------|
+| `cfg80211.ieee80211_regdom=CN`（UKI 内核参数） | iwlwifi 自管模式无视 |
+| 安装 `wireless-regdb` | `iw reg get` 显示 CN，但 AP 信道仍 `NO_IR` |
+| 移除 `ieee80211d/country_code`（避免触发固件重检） | 无效 |
+| 切换 5GHz 信道 36/149 | 全部失败 |
+| `modprobe` 热重载 cfg80211(cn) | `(no IR)` 暂时消失，hostapd 调用后回归 |
+
+**结论**: 需外接 USB 5GHz 网卡（推荐 MT7612U 芯片，驱动 `mt76x2u` 主线自带）
+
+### 已安装的依赖（换网卡时可直接用）
+
+| 包 | 用途 |
+|----|------|
+| `wireless-regdb` | 提供 `regulatory.db`，解锁 CN 域名 5GHz 信道 |
+| `cfg80211.ieee80211_regdom=CN` | 已写入 `/etc/kernel/cmdline`（UKI 已重建） |
+
+### 注意事项
+
+- **nftables ifindex 漂移**：WiFi 模块重载会使 `wlp0s20f3` ifindex 变化。若用数字索引（`iif 3`）会失效。当前配置使用接口名（`iif wlp0s20f3`），但热重载后需 `nft -f /etc/nftables.conf` 重刷
+- **wifi-lan-ip 服务**：模块卸载时接口消失，`ExecStop` 会 fail。重启后需 `systemctl reset-failed` 再 start
