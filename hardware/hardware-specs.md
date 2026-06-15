@@ -35,22 +35,28 @@
 
 | 项 | 值 |
 |------|--------|
-| 容量 | 30 GiB (LPDDR5x 板载) |
+| 容量 | 30 GiB (LPDDR5x LPCAMM2, 可更换) |
+| 型号 | Samsung M561K2LC4EE1-CCUYD (8×4 GiB 子通道, 单 LPCAMM2 模组) |
+| 速率 | 9600 MT/s (运行于 7467 MT/s, Panther Lake 平台限制) |
+| 电压 | 0.5 V (LPDDR5x) |
+| 支持最大容量 | 128 GiB (SMBIOS) |
 | Swap | 30 GiB (zram, zstd) |
 
 ## 存储
 
 | 项 | 值 |
 |------|--------|
-| 型号 | Samsung MZVL81T0HFLB-00BLL |
+| 型号 | Samsung MZVL81T0HFLB-00BLL (PM9C1a) |
 | 容量 | 953.9 GiB (NVMe) |
+| 接口 | M.2 2280, PCIe 4.0 ×4 (16.0 GT/s) |
 
 ## 网络
 
 | 类型 | 型号 |
 |------|--------|
 | 有线 | Intel I219-V (Ethernet) |
-| 无线 | Intel Panther Lake PCH CNVi WiFi |
+| 无线 | Intel BE211 Wi-Fi 7 320MHz (CNVr2, M.2 2230) |
+| WWAN | Quectel EM05-CN 4G (M.2 3042, USB 3-6) |
 
 ## 电池
 
@@ -60,6 +66,17 @@
 | 设计容量 | 60 Wh |
 | 当前容量 | 60 Wh (100%) |
 | 循环次数 | 2 |
+
+## 分区
+
+| 分区 | 大小 | 格式 | 用途 |
+|------|------|------|------|
+| nvme0n1p1 | 200 MiB | vfat | Windows EFI |
+| nvme0n1p2 | 16 MiB | - | MSR |
+| nvme0n1p3 | 700 GiB | ntfs | Windows |
+| nvme0n1p4 | 841 MiB | ntfs | Windows 恢复 |
+| nvme0n1p5 | 477 MiB | vfat | Arch Linux EFI |
+| nvme0n1p6 | 252 GiB | btrfs | Arch Linux `/` + `/home` |
 
 ## 软件
 
