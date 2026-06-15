@@ -12,6 +12,7 @@
 | 8 | 06-12 | 屏幕亮度+键盘背光联动（已撤销，覆盖手动操作） |
 | 9 | 06-12 | NVMe 延迟 + PCIe ASPM 纳入 PPD 联动 |
 | 10 | 06-13 | VM dirty_ratio + vfs_cache_pressure + I/O scheduler none |
+| 11 | 06-15 | 30 分钟满载压力测试验证 (stress-ng cpu+vm, 零降频, 97°C)
 
 ## 检查清单
 
