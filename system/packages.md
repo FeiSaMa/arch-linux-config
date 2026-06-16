@@ -30,7 +30,7 @@ mission-center
 foliate fragments
 nautilus-python
 neovim github-cli
-fastfetch yazi
+fastfetch yazi less
 flatpak
 exfat-utils
 
@@ -95,7 +95,7 @@ sudo pacman -S --needed mission-center
 sudo pacman -S --needed foliate fragments
 sudo pacman -S --needed nautilus-python
 sudo pacman -S --needed neovim github-cli
-sudo pacman -S --needed fastfetch yazi
+sudo pacman -S --needed fastfetch yazi less
 sudo pacman -S --needed flatpak
 sudo pacman -S --needed exfat-utils
 
