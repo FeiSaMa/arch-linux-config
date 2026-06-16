@@ -50,6 +50,7 @@
 - **NetworkManager** 接管网络
 - **ufw** 防火墙已启用
 - **Clash Verge** 代理核心
+- **aerc** CLI 邮件客户端：Gmail（直连 IMAPS）+ 163（Python 代理注入 IMAP ID）
 
 ### 硬件调优
 - **thinkfan**：ThinkPad 风扇控制
