@@ -59,7 +59,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Uncomment the following line if you want to disable marking untracked files
 # under VCS as dirty. This makes repository status check for large repositories
 # much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
+DISABLE_UNTRACKED_FILES_DIRTY="true"
 
 # Uncomment the following line if you want to change the command execution time
 # stamp shown in the history command output.
@@ -116,8 +116,8 @@ source $ZSH/oh-my-zsh.sh
 HISTFILE=~/.zsh_history
 
 # 设置在会话（内存）中和历史文件中保存的条数，建议设置得大一些
-HISTSIZE=1000
-SAVEHIST=1000
+HISTSIZE=10000
+SAVEHIST=10000
 
 # 忽略重复的命令，连续输入多次的相同命令只记一次
 setopt HIST_IGNORE_DUPS

@@ -13,6 +13,7 @@
 | 9 | 06-12 | NVMe 延迟 + PCIe ASPM 纳入 PPD 联动 |
 | 10 | 06-13 | VM dirty_ratio + vfs_cache_pressure + I/O scheduler none |
 | 11 | 06-15 | 30 分钟满载压力测试验证 (stress-ng cpu+vm, 零降频, 97°C)
+| 12 | 06-17 | 清理无用包 (intel-undervolt/paru/dhcpcd), pacman ParallelDownloads 10, split_lock_detect=off, ZSH 历史 1000→10000, DISABLE_UNTRACKED_FILES_DIRTY
 
 ## 检查清单
 

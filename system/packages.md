@@ -5,7 +5,7 @@
 ```
 # Core/系统
 base grub efibootmgr os-prober
-networkmanager dhcpcd
+networkmanager
 snapper grub-btrfs snap-pac btrfs-assistant btrfs-progs
 pacman-contrib
 power-profiles-daemon
@@ -51,16 +51,12 @@ zsh zsh-autosuggestions zsh-completions zsh-syntax-highlighting
 zsh-theme-powerlevel10k-git
 
 # AUR 助手
-yay paru
-archlinuxcn-keyring
-
-# 注：paru 仅在 packages.md 中记录，RESTORE.md 中未安装（yay 已覆盖 AUR 需求）
 
 # 开发
 base-devel inotify-tools
 
 # 硬件调优
-stress-ng intel-undervolt
+stress-ng
 ```
 
 ## AI 安装命令
@@ -70,7 +66,7 @@ stress-ng intel-undervolt
 ```bash
 # Core/系统
 sudo pacman -S --needed base grub efibootmgr os-prober
-sudo pacman -S --needed networkmanager dhcpcd
+sudo pacman -S --needed networkmanager
 sudo pacman -S --needed snapper grub-btrfs snap-pac btrfs-assistant btrfs-progs
 sudo pacman -S --needed pacman-contrib
 sudo pacman -S --needed power-profiles-daemon
@@ -125,7 +121,7 @@ sudo pacman -S --needed zsh-theme-powerlevel10k-git
 sudo pacman -S --needed base-devel inotify-tools
 
 # 硬件调优
-sudo pacman -S --needed stress-ng intel-undervolt
+sudo pacman -S --needed stress-ng
 ```
 
 ### AUR 包

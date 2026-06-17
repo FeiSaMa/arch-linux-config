@@ -98,7 +98,7 @@ ls ~/.config/opencode/opencode.jsonc ~/.config/opencode/instructions/system.md
 ```bash
 # Core/系统
 sudo pacman -S --needed base grub efibootmgr os-prober
-sudo pacman -S --needed networkmanager dhcpcd
+sudo pacman -S --needed networkmanager
 # 注：snapper/grub-btrfs/snap-pac 需要 Btrfs 文件系统，非 Btrfs 环境跳过
 sudo pacman -S --needed btrfs-progs
 if mount | grep -q 'on / type btrfs'; then
@@ -159,7 +159,7 @@ sudo pacman -S --needed zsh-theme-powerlevel10k-git
 sudo pacman -S --needed base-devel inotify-tools
 
 # 硬件调优
-sudo pacman -S --needed stress-ng intel-undervolt
+sudo pacman -S --needed stress-ng
 ```
 
 **AUR 包：**
