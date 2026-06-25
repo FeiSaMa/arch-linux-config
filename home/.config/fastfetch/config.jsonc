@@ -62,9 +62,10 @@
       "keyColor": "#f5bde6"
     },
     {
-      "type": "uptime",
+      "type": "Command",
       "key": "Age",
-      "keyColor": "#f5bde6"
+      "keyColor": "#f5bde6",
+      "text": "/home/feisama/.local/bin/system-age"
     },
     {
       "type": "packages",

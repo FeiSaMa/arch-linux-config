@@ -1,0 +1,26 @@
+#!/bin/bash
+first_ts=$(head -1 /var/log/pacman.log | grep -oP '^\[[^]]+\]' | tr -d '[]')
+if [[ -z "$first_ts" ]]; then
+  echo "unknown"
+  exit 0
+fi
+first_epoch=$(date -d "$first_ts" +%s)
+now_epoch=$(date +%s)
+delta=$((now_epoch - first_epoch))
+
+days=$((delta / 86400))
+weeks=$((days / 7))
+if (( weeks > 0 )); then
+  rem_days=$((days % 7))
+  if (( rem_days == 1 )); then
+    echo "${weeks} weeks, 1 day"
+  elif (( rem_days > 0 )); then
+    echo "${weeks} weeks, ${rem_days} days"
+  else
+    echo "${weeks} weeks"
+  fi
+elif (( days == 1 )); then
+  echo "1 day"
+else
+  echo "${days} days"
+fi
