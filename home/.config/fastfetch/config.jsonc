@@ -62,8 +62,8 @@
       "keyColor": "#f5bde6"
     },
     {
-      "type": "uptime",
-      "key": "Uptime",
+      "type": "age",
+      "key": "Age",
       "keyColor": "#f5bde6"
     },
     {
