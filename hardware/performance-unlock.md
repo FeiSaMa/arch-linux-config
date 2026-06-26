@@ -762,3 +762,64 @@ powerprofilesctl set balanced && sleep 12
 iw dev wlp0s20f3 get power_save   # → Power save: on
 ```
 
+---
+
+## 17. 后续维护: 2026-06-26 NVMe 队列优化 + irqbalance
+
+### NVMe read_ahead_kb 128 → 4096
+NVMe 延迟极低（~0.1ms），128 KB 预读是为 HDD 设计的保守值。4096 KB 可提升大文件顺序读性能（游戏加载、编译、视频编辑）。持久化在 `ppd-power-tune.sh` 的 `set_sched()` 中。
+
+### NVMe nomerges 0 → 2
+NVMe 无需内核 IO 合并，`nomerges=2`（全部禁用合并）减少 CPU 开销。同样持久化在 `set_sched()` 中。
+
+### irqbalance
+16 核系统启用中断均衡分布，减少单核 IRQ 压力。`systemctl enable --now irqbalance`。
+
+### set_sched() 完整代码
+```bash
+set_sched() {
+    echo "none" > "$NVME_SCHED" 2>/dev/null || echo "WARNING: failed to set NVMe scheduler" >&2
+    echo "4096" > /sys/block/nvme0n1/queue/read_ahead_kb 2>/dev/null || echo "WARNING: failed to set read_ahead" >&2
+    echo "2" > /sys/block/nvme0n1/queue/nomerges 2>/dev/null || echo "WARNING: failed to set nomerges" >&2
+}
+```
+
+### 验证
+```bash
+cat /sys/block/nvme0n1/queue/read_ahead_kb  # → 4096
+cat /sys/block/nvme0n1/queue/nomerges        # → 2
+cat /sys/block/nvme0n1/queue/scheduler        # → [none]
+systemctl is-active irqbalance                # → active
+```
+
+---
+
+## 18. 后续维护: 2026-06-26 zram 缩容 30.8GB → 16GB
+
+### 背景
+zram 配置为 `zram-size = ram`（100% RAM = 30.8 GB），但实际从未被使用（0 字节数据），浪费约 15 GB 内存给 zram 压缩窗口而非文件缓存。
+
+### 方案
+修改 `/etc/systemd/zram-generator.conf`：
+```ini
+[zram0]
+zram-size = 16384
+compression-algorithm = zstd
+```
+
+16 GB（~50% RAM）足以应对极端内存压力，剩余内存归还给内核文件缓存。
+
+### 执行
+```bash
+swapoff /dev/zram0
+sed -i 's/^zram-size = ram/zram-size = 16384/' /etc/systemd/zram-generator.conf
+systemctl restart systemd-zram-setup@zram0.service
+# swapon 由 dev-zram0.swap 自动触发
+```
+
+### 验证
+```bash
+free -h | grep Swap   # → 15Gi (was 30Gi)
+zramctl                # → DISKSIZE=16G
+```
+

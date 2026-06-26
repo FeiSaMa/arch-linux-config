@@ -93,6 +93,8 @@ set_limits() {
 
 set_sched() {
     echo "none" > "$NVME_SCHED" 2>/dev/null || echo "WARNING: failed to set NVMe scheduler" >&2
+    echo "4096" > /sys/block/nvme0n1/queue/read_ahead_kb 2>/dev/null || echo "WARNING: failed to set read_ahead" >&2
+    echo "2" > /sys/block/nvme0n1/queue/nomerges 2>/dev/null || echo "WARNING: failed to set nomerges" >&2
 }
 
 case "${1:-}" in
