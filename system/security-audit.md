@@ -159,3 +159,21 @@ gvfsd-http     → 198.18.0.5:443                     (GNOME 文件服务)
 2. 恢复 AUR 更新前审查每个包的 PKGBUILD 变更
 3. 保持 `pacman -Qkk $(pacman -Qmq)` 定期校验
 4. `pacman -Sc` 后应保留关键 AUR 包构建日志以便回溯审计
+5. AUR 更新使用 `yay -S --sudo pkexec`（本机 pam_faillock 已配置，sudo 会阻断 pacman 安装阶段）
+
+## 后续更新记录
+
+### 2026-06-26 — AUR 包更新
+
+| 包 | 旧版本 | 新版本 | PKGBUILD | 校验和 | 结论 |
+|---|---|---|---|---|---|
+| `opencode-bin` | 1.17.7-1 | 1.17.11-1 | ✅ GitHub Releases 官方源 | ✅ sha256 | 干净 |
+| `visual-studio-code-bin` | 1.124.2-1 | 1.126.0-1 | ✅ Microsoft CDN | ✅ sha256 | 干净 |
+| `moekoemusic-bin` | 1.6.5-1 | 1.6.6-1 | ✅ GitHub Releases 官方源 | ✅ sha256 | 干净 |
+
+审查要点：
+- 三个包源码 URL 均指向官方域名（github.com, update.code.visualstudio.com）
+- 均有 sha256 校验和且通过验证
+- `package()` 函数无 `curl`/`wget` 网络调用
+- `moekoemusic-bin` 的 `prepare()` 调用 `asar e`/`asar p` 为 Electron 应用标准路径修复，无恶意行为
+- 安装阶段因本机 pam_faillock 需用 `pkexec` 替代 `sudo`
