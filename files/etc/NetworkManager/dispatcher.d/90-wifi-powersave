@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+IFACE="$1"
+ACTION="$2"
+
+[[ "$IFACE" == wl* ]] || exit 0
+[[ "$ACTION" == up ]] || exit 0
+
+PROFILE=$(cat /sys/firmware/acpi/platform_profile 2>/dev/null || echo "balanced")
+
+case "$PROFILE" in
+    performance) iw dev "$IFACE" set power_save off ;;
+    *)           iw dev "$IFACE" set power_save on ;;
+esac

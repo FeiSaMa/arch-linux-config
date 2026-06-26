@@ -9,6 +9,12 @@ VM_DIRTY="/proc/sys/vm/dirty_ratio"
 VM_DIRTY_BG="/proc/sys/vm/dirty_background_ratio"
 VM_CACHE="/proc/sys/vm/vfs_cache_pressure"
 
+WIFI_IFACE=""
+for i in /sys/class/net/wl*/uevent; do
+    WIFI_IFACE=$(basename "$(dirname "$i")")
+    break
+done
+
 PKG_DOMAINS=()
 PSYS_DOMAINS=()
 for d in /sys/class/powercap/intel-rapl*/intel-rapl* /sys/class/powercap/intel-rapl-mmio*/intel-rapl-mmio*; do
@@ -31,26 +37,29 @@ LAST_PROFILE=""
 set_limits() {
     local profile="$1"
     local pkg_pl1 pkg_pl2 psys_pl1 psys_pl2 gt0_min gt1_min nvme_lat aspm
-    local dirty_ratio dirty_bg cache_pressure
+    local dirty_ratio dirty_bg cache_pressure wifi_ps
     case "$profile" in
         performance)
             pkg_pl1=75000000; pkg_pl2=110000000
             psys_pl1=80000000; psys_pl2=130000000
             gt0_min=700; gt1_min=450
             nvme_lat=0; aspm=performance
-            dirty_ratio=10; dirty_bg=5; cache_pressure=50 ;;
+            dirty_ratio=10; dirty_bg=5; cache_pressure=50
+            wifi_ps=off ;;
         balanced)
             pkg_pl1=65000000; pkg_pl2=85000000
             psys_pl1=70000000; psys_pl2=95000000
             gt0_min=650; gt1_min=400
             nvme_lat=100000; aspm=powersave
-            dirty_ratio=15; dirty_bg=7; cache_pressure=75 ;;
+            dirty_ratio=15; dirty_bg=7; cache_pressure=75
+            wifi_ps=on ;;
         low-power)
             pkg_pl1=20000000; pkg_pl2=35000000
             psys_pl1=25000000; psys_pl2=40000000
             gt0_min=100; gt1_min=100
             nvme_lat=500000; aspm=powersupersave
-            dirty_ratio=20; dirty_bg=10; cache_pressure=100 ;;
+            dirty_ratio=20; dirty_bg=10; cache_pressure=100
+            wifi_ps=on ;;
         *)
             if [ -n "$LAST_PROFILE" ]; then
                 echo "WARNING: unknown profile '"$profile"', keeping last known ($LAST_PROFILE)" >&2
@@ -76,6 +85,9 @@ set_limits() {
     echo "$dirty_ratio" > "$VM_DIRTY" 2>/dev/null || echo "WARNING: failed to set dirty_ratio" >&2
     echo "$dirty_bg" > "$VM_DIRTY_BG" 2>/dev/null || echo "WARNING: failed to set dirty_background_ratio" >&2
     echo "$cache_pressure" > "$VM_CACHE" 2>/dev/null || echo "WARNING: failed to set vfs_cache_pressure" >&2
+    if [ -n "$WIFI_IFACE" ]; then
+        iw dev "$WIFI_IFACE" set power_save "$wifi_ps" 2>/dev/null || echo "WARNING: failed to set WiFi power_save" >&2
+    fi
     echo "Applied power limits for profile: $profile"
 }
 

@@ -706,3 +706,59 @@ cat /sys/block/nvme0n1/queue/scheduler  # → [none]
 
 ---
 
+## 16. 后续维护: 2026-06-26 WiFi Power Save 纳入 PPD 联动
+
+### 背景
+Intel CNVi WiFi (Panther Lake PCH) 默认开启 802.11 省电模式，会增加 1-3ms 延迟抖动，对 SSH/游戏不利。应根据 PPD 模式自动切换。
+
+### 方案
+纳入 PPD 联动，写入 `ppd-power-tune.sh`：
+
+| 模式 | WiFi power_save | 说明 |
+|------|----------------|------|
+| performance | **off** | 最低延迟，适合游戏/SSH |
+| balanced | **on** | 省电，日常使用 |
+| low-power | **on** | 最大省电 |
+
+同时创建 NetworkManager dispatcher 脚本 `/etc/NetworkManager/dispatcher.d/90-wifi-powersave`，在 WiFi 重连时根据当前 PPD 模式立即设置 power_save，避免重启/daemon 轮询间隔内出现空洞。
+
+### 文件
+
+**`/usr/local/bin/ppd-power-tune.sh`** — `set_limits()` 增加：
+```bash
+wifi_ps=off    # performance
+wifi_ps=on     # balanced / low-power
+iw dev "$WIFI_IFACE" set power_save "$wifi_ps"
+```
+
+WiFi 接口自动检测（首个 wl* 设备）：
+```bash
+for i in /sys/class/net/wl*/uevent; do
+    WIFI_IFACE=$(basename "$(dirname "$i")")
+    break
+done
+```
+
+**`/etc/NetworkManager/dispatcher.d/90-wifi-powersave`**：
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+IFACE="$1"; ACTION="$2"
+[[ "$IFACE" == wl* ]] || exit 0
+[[ "$ACTION" == up ]] || exit 0
+PROFILE=$(cat /sys/firmware/acpi/platform_profile 2>/dev/null || echo "balanced")
+case "$PROFILE" in
+    performance) iw dev "$IFACE" set power_save off ;;
+    *)           iw dev "$IFACE" set power_save on ;;
+esac
+```
+
+### 验证
+```bash
+powerprofilesctl set performance && sleep 12
+iw dev wlp0s20f3 get power_save   # → Power save: off
+
+powerprofilesctl set balanced && sleep 12
+iw dev wlp0s20f3 get power_save   # → Power save: on
+```
+
