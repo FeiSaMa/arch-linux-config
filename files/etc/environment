@@ -8,4 +8,3 @@ XIM="fcitx"
 GTK_IM_MODULE=fcitx
 QT_IM_MODULE=fcitx
 XMODIFIERS=@im=fcitx
-MUTTER_DEBUG_FORCE_KMS_MODE=simple
