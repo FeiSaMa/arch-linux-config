@@ -16,6 +16,7 @@ linux-firmware
 linux-zen-headers linux-lts-headers
 intel-ucode intel-media-driver sof-firmware alsa-firmware alsa-ucm-conf
 bluez bluez-utils
+fwupd
 
 # GNOME 桌面
 gnome-desktop gnome-shell gdm gnome-control-center gnome-software
@@ -77,6 +78,7 @@ sudo pacman -S --needed linux-firmware
 sudo pacman -S --needed linux-zen-headers linux-lts-headers
 sudo pacman -S --needed intel-ucode intel-media-driver sof-firmware alsa-firmware alsa-ucm-conf
 sudo pacman -S --needed bluez bluez-utils
+sudo pacman -S --needed fwupd
 
 # GNOME 桌面
 sudo pacman -S --needed gnome-desktop gnome-shell gdm gnome-control-center gnome-software
