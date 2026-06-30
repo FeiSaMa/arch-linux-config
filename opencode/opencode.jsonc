@@ -9,8 +9,8 @@
   // 默认使用 V4-Flash（平衡速度与能力）
   "model": "deepseek/deepseek-v4-flash",
 
-  // 默认使用 build agent
-  "default_agent": "build",
+  // 默认使用 code agent（省钱优先）
+  "default_agent": "code",
 
   "provider": {
     "deepseek": {
@@ -76,7 +76,8 @@
       "model": "deepseek/deepseek-v4-pro",
       "description": "默认开发 Agent，用于复杂代码编写、架构设计、重构等需要深度推理的任务",
       "color": "#4FC3F7",
-      "temperature": 0.3,
+      "temperature": 0.5,
+      "steps": 20,
       "permission": {
         "edit": "allow",
         "bash": "allow"
@@ -88,6 +89,7 @@
       "description": "编码专用 Agent，低温度高确定性，适合代码生成与修改",
       "color": "#FFB74D",
       "temperature": 0.2,
+      "top_p": 0.9,
       "permission": {
         "edit": "allow",
         "bash": "allow"
