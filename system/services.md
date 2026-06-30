@@ -59,6 +59,12 @@ sudo systemctl enable clash-verge-service.service
 sudo systemctl mask NetworkManager-initrd.service
 ```
 
+### 屏蔽用户服务
+
+```bash
+systemctl --user mask org.freedesktop.IBus.session.GNOME.service  # 使用 Fcitx5，禁用 GNOME 自带 IBus
+```
+
 ### 用户服务
 
 ```bash
