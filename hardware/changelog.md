@@ -18,6 +18,7 @@
 | 14 | 06-26 | NVMe read_ahead_kb 128→4096, nomerges 0→2, zram 30.8GB→16GB, irqbalance 启用 |
 | 15 | 06-30 | xe.nuclear_pageflip=1 (Panther Lake 原子 KMS, 修复全屏光标残影); xe.enable_dsb=0 (抑制 DSB poll error 数百条/启动); mask NetworkManager-initrd.service (消除 D-Bus bus name 冲突) |
 | 16 | 06-30 | xe.enable_psr=0 (禁用 PSR, 修复 Panther Lake vblank 缩短导致 Atomic update failure 23 次/启动) |
+| 17 | 06-30 | 移除 xe.nuclear_pageflip=1 (全屏 VSCode/Typora 渲染冻结); 重新启用 xe.enable_dc=0 + xe.enable_sagv=0 + xe.enable_ips=0 (替代方案, 修复 XWayland 全屏低帧率) |
 
 ## 检查清单
 

@@ -14,7 +14,7 @@
 - GRUB 2.14
 - UEFI 模式 (`/efi`)
 - GRUB 配置：`/etc/default/grub`
-- 内核命令行：`loglevel=5 zswap.enabled=0 nmi_watchdog=0 mitigations=off split_lock_detect=off xe.nuclear_pageflip=1 xe.enable_dsb=0`
+- 内核命令行：`loglevel=5 zswap.enabled=0 nmi_watchdog=0 mitigations=off split_lock_detect=off xe.enable_dsb=0 xe.enable_psr=0 xe.enable_dc=0 xe.enable_sagv=0 xe.enable_ips=0`
 - 默认启动项：`saved`（记住上次选择）
 - 超时：5 秒（`GRUB_TIMEOUT=5`）
 - 分辨率：1920x1200（`GRUB_GFXMODE=1920x1200`）
