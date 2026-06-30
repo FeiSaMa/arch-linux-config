@@ -56,24 +56,14 @@
   },
 
   // ============================================================
-  // Agent 体系：5 个专用 Agent 覆盖不同复杂度场景
+  // Agent 体系：4 个专用 Agent 覆盖不同复杂度场景
   // ============================================================
   "agent": {
-    // ---- Tab 顺序: explore → plan → build → code → quick ----
-    "explore": {
-      "mode": "all",
-      "model": "deepseek/deepseek-v4-flash",
-      "description": "快速代码库探索 Agent，只读模式，用于文件搜索、代码分析等",
-      "temperature": 0.1,
-      "permission": {
-        "edit": "deny",
-        "bash": "deny"
-      }
-    },
+    // ---- Tab 顺序: plan → build → code → create ----
     "plan": {
       "mode": "all",
       "model": "deepseek/deepseek-v4-flash",
-      "description": "规划和代码审查 Agent，用 Flash 做快速分析和方案设计，只读模式",
+      "description": "规划与探索 Agent — 代码分析、方案设计、代码库探索，只读模式",
       "color": "#81C784",
       "temperature": 0.1,
       "permission": {
@@ -103,13 +93,12 @@
         "bash": "allow"
       }
     },
-    "quick": {
-      "description": "极速轻量助手 - 处理文件查找、简单问答、格式化等简单任务，使用 V4-Flash 非思考模式",
+    "create": {
       "mode": "all",
       "model": "deepseek/deepseek-v4-flash",
-      "color": "#A1887F",
-      "temperature": 0.1,
-      "steps": 5,
+      "description": "创意生成 Agent — 头脑风暴、内容创作、概念设计，最高温度最发散",
+      "color": "#E57373",
+      "temperature": 1.0,
       "permission": {
         "edit": "allow",
         "bash": "allow"
