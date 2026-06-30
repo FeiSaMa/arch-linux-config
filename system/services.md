@@ -53,6 +53,12 @@ sudo systemctl enable ppd-profile-monitor.service
 sudo systemctl enable clash-verge-service.service
 ```
 
+### 屏蔽服务
+
+```bash
+sudo systemctl mask NetworkManager-initrd.service
+```
+
 ### 用户服务
 
 ```bash

@@ -16,6 +16,7 @@
 | 12 | 06-17 | 清理无用包 (intel-undervolt/paru/dhcpcd), pacman ParallelDownloads 10, split_lock_detect=off, ZSH 历史 1000→10000, DISABLE_UNTRACKED_FILES_DIRTY |
 | 13 | 06-26 | WiFi power_save 纳入 PPD 联动 (perf=off, 其他=on)，新增 NM dispatcher 处理重连 |
 | 14 | 06-26 | NVMe read_ahead_kb 128→4096, nomerges 0→2, zram 30.8GB→16GB, irqbalance 启用 |
+| 15 | 06-30 | xe.nuclear_pageflip=1 (Panther Lake 原子 KMS, 修复全屏光标残影); xe.enable_dsb=0 (抑制 DSB poll error 数百条/启动); mask NetworkManager-initrd.service (消除 D-Bus bus name 冲突) |
 
 ## 检查清单
 
