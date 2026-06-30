@@ -39,6 +39,15 @@
 
 参见 `gnome/extensions.sh` 中的完整 UUID 列表。
 
+### Blur My Shell 补丁
+
+面板模糊在 Shell 启动时产生 `Can't update stage views` 日志刷屏。
+根因：`panel.js` 在插入背景 actor 后立即调用 `update_size()`，此时面板尚未分配。
+修复：删除立即调用，仅靠 `queue_update_size` (GLib.idle_add) 延迟更新。
+
+补丁位置：`~/.local/share/gnome-shell/extensions/blur-my-shell@aunetx/components/panel.js`
+需移除 `this.update_size(actors);` 调用，保留 `this.queue_update_size(actors);`
+
 ## AI 恢复命令
 
 ```bash
