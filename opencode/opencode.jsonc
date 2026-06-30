@@ -96,9 +96,10 @@
     "create": {
       "mode": "all",
       "model": "deepseek/deepseek-v4-flash",
-      "description": "创意生成 Agent — 头脑风暴、内容创作、概念设计，最高温度最发散",
+      "description": "创意生成 Agent — 头脑风暴、内容创作、概念设计，较高温度 + top_p 约束保持可控",
       "color": "#E57373",
-      "temperature": 1.0,
+      "temperature": 0.8,
+      "top_p": 0.95,
       "permission": {
         "edit": "allow",
         "bash": "allow"
