@@ -6,7 +6,7 @@
     "vscode-neovim.highlightGroups.highlights": {},
     "vscode-neovim.restoreCursorPositionOnEscape": true,
     "vscode-neovim.compositeKeys": {
-        "jj": { "command": "vscode-neovim.escape" }
+        "jf": { "command": "vscode-neovim.escape" }
     },
     "animations.Install-Method": "Apc Customize UI++",
     "apc.imports": [
