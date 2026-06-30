@@ -30,12 +30,12 @@
 ## mkinitcpio
 
 ```ini
-MODULES=(thinkpad_acpi)
+MODULES=(thinkpad_acpi psmouse)
 HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block filesystems fsck)
 ```
 
 - `microcode` hook 加载 Intel 微码更新
-- `MODULES=(thinkpad_acpi)` 由 pacman hook 维护
+- `MODULES=(thinkpad_acpi psmouse)` — thinkpad_acpi 由 pacman hook 维护，psmouse 手动添加以驱动小红点（TPPS/2 Synaptics TrackPoint）
 
 ## initramfs
 
