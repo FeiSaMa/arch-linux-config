@@ -8,7 +8,28 @@ top_p: 0.9
 color: "#FFB74D"
 permission:
   edit: allow
-  bash: allow
+  bash:
+    "npx *": allow
+    "npm *": allow
+    "pnpm *": allow
+    "yarn *": allow
+    "cargo *": allow
+    "python *": allow
+    "pip *": allow
+    "go *": allow
+    "git *": allow
+    "rg *": allow
+    "ls *": allow
+    "cat *": allow
+    "head *": allow
+    "wc *": allow
+    "make *": allow
+    "just *": allow
+    "mkdir *": allow
+    "cp *": allow
+    "mv *": allow
+    "rm *": allow
+    "*": deny
 ---
 
 # Code Agent — 日常编码

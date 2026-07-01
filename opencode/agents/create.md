@@ -4,10 +4,20 @@ mode: subagent
 model: deepseek/deepseek-v4-flash
 temperature: 0.8
 top_p: 0.95
+steps: 15
 color: "#E57373"
 permission:
   edit: deny
-  bash: allow
+  bash:
+    "git *": allow
+    "rg *": allow
+    "ls *": allow
+    "cat *": allow
+    "head *": allow
+    "wc *": allow
+    "find *": allow
+    "tree *": allow
+    "*": deny
 ---
 
 # Create Agent — 创意生成

@@ -10,6 +10,8 @@ permission:
   bash:
     "npx *": allow
     "npm *": allow
+    "pnpm *": allow
+    "yarn *": allow
     "cargo *": allow
     "python *": allow
     "pytest *": allow
@@ -18,6 +20,19 @@ permission:
     "ruff *": allow
     "mypy *": allow
     "go *": allow
+    "tsc *": allow
+    "eslint *": allow
+    "vitest *": allow
+    "jest *": allow
+    "cmake *": allow
+    "dotnet *": allow
+    "gradle *": allow
+    "mvn *": allow
+    "git *": allow
+    "ls *": allow
+    "cat *": allow
+    "head *": allow
+    "wc *": allow
     "*": deny
 ---
 

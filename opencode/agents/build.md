@@ -10,7 +10,33 @@ thinking:
   reasoning_effort: max
 permission:
   edit: allow
-  bash: allow
+  bash:
+    "npx *": allow
+    "npm *": allow
+    "pnpm *": allow
+    "yarn *": allow
+    "cargo *": allow
+    "python *": allow
+    "pip *": allow
+    "go *": allow
+    "git *": allow
+    "rg *": allow
+    "ls *": allow
+    "cat *": allow
+    "head *": allow
+    "wc *": allow
+    "make *": allow
+    "just *": allow
+    "mkdir *": allow
+    "cp *": allow
+    "mv *": allow
+    "rm *": allow
+    "chmod *": allow
+    "docker *": allow
+    "systemctl *": allow
+    "pkexec *": allow
+    "sudo *": allow
+    "*": deny
 ---
 
 # Build Agent — 复杂开发
