@@ -9,6 +9,9 @@
   // 默认使用 V4-Flash（平衡速度与能力）
   "model": "deepseek/deepseek-v4-flash",
 
+  // 简单任务（标题生成、摘要等）使用 chat 模型降低成本
+  "small_model": "deepseek/deepseek-chat",
+
   // 默认使用 macro agent（意图精炼 + 分发总管）
   "default_agent": "macro",
 
@@ -29,17 +32,63 @@
           "cost": {
             "input": 4,
             "output": 16
+          },
+          // 开启 thinking 模式，利用 reasoning_effort: max 提升深度推理质量
+          "options": {
+            "thinking": {
+              "type": "enabled",
+              "reasoning_effort": "max"
+            }
+          }
+        },
+        "deepseek-chat": {
+          "cost": {
+            "input": 0.5,
+            "output": 2
           }
         }
       }
-    }
+    },
+    // ============================================================
+    // Fallback provider：当 DeepSeek API 不可用时的降级方案
+    // 需自行设置环境变量 OPENAI_API_KEY
+    // 取消注释下方整个块即可启用（同时注释掉 deepseek 块来做切换测试）
+    // ============================================================
+    // "openai": {
+    //   "options": {
+    //     "timeout": 300000,
+    //     "chunkTimeout": 15000
+    //   },
+    //   "models": {
+    //     "gpt-4o": {
+    //       "cost": {
+    //         "input": 5,
+    //         "output": 15
+    //       }
+    //     },
+    //     "gpt-4o-mini": {
+    //       "cost": {
+    //         "input": 0.15,
+    //         "output": 0.6
+    //       }
+    //     }
+    //   }
+    // }
   },
 
-  "instructions": ["~/.config/opencode/instructions/system.md"],
+  // ============================================================
+  // 全局指令：适用于所有 Agent 的系统级提权规则
+  // 提权规则统一在此处管理，各 Agent 不再单独定义
+  // ============================================================
+  "instructions": [
+    "## 系统提权规则\n\n涉及系统级操作（修改 `/etc/`、重启服务、安装软件包等）时，必须正确选择提权方式：\n\n- **当前机器**（pam_faillock 已配置，sudo 失败 3 次锁定 10 分钟）：**必须使用 `pkexec`**\n- **新机器**（pam_faillock 未配置）：使用 `sudo`\n\n**检测方式**：`pkexec --version` 成功 → 用 `pkexec`；否则用 `sudo`。\n\n```bash\n# 示例：复制文件到 /etc/\npkexec cp file /etc/somewhere      # 当前机器\nsudo cp file /etc/somewhere         # 新机器\n```",
+    "## 步骤日志记录规则\n\n你负责记录每步操作日志。在返回消息的**最末尾**附加以下代码块：\n\n```markdown\n## 执行日志\n\n### Step 1: [步骤简述]\n- **推理**: [思考过程]\n- **工具**: `tool_name` [关键参数]\n- **返回**: [关键内容摘要]\n- **结论**: [观察与判断]\n```\n\n**规则**：\n1. 每调用一次工具 = 一个 Step\n2. 禁止省略任何步骤\n3. 工具返回摘要控制在 3-5 行内，勿原文复制\n4. 日志附着在最终消息末尾，不单独发送\n5. 最后附加性能摘要小节",
+    "## 写入前备份规则\n\n子 Agent 在执行任何文件写入/编辑操作前，**必须先备份原文件**到 `~/.cache/opencode-backup/` 目录（如目录不存在则创建）。备份命名格式：`{original_path_underscored}.bak.{timestamp}`。\n\n```bash\n# 示例：编辑 /home/user/project/src/main.py 前\nmkdir -p ~/.cache/opencode-backup\ncp /home/user/project/src/main.py ~/.cache/opencode-backup/main.py.bak.$(date +%s)\n```\n\n此规则适用于所有拥有 `edit: allow` 权限的 Agent（build, code, create）。若写入失败或结果不符合预期，可从备份中恢复。"
+  ],
 
   "references": {
     "arch-linux-config": {
-      "path": "~/refs/arch-linux-config",
+      "path": "${HOME}/refs/arch-linux-config",
       "description": "Arch Linux system configuration docs — use for /etc/ config files, packages, services, dotfiles, and hardware tuning (see hardware/ subdirectory)"
     }
   },
@@ -52,60 +101,19 @@
   "compaction": {
     "auto": true,
     "prune": true,
-    "reserved": 10000
+    "reserved": 24000,
+    "tail_turns": 10
   },
 
   // ============================================================
-  // Agent 体系：5 个专用 Agent 覆盖不同复杂度场景
+  // Agent 体系：6 个专用 Agent 覆盖不同复杂度场景
+  // 各 Agent 的完整定义已迁移至 ~/.config/opencode/agents/*.md
+  // ============================================================
+
+  // ============================================================
+  // Agent 禁用：以下内建 Agent 被 macro 体系取代
   // ============================================================
   "agent": {
-    // ---- Tab 顺序: macro → plan → build → code → create ----
-    "plan": {
-      "mode": "all",
-      "model": "deepseek/deepseek-v4-flash",
-      "description": "规划与探索 Agent — 代码分析、方案设计、代码库探索，只读模式",
-      "color": "#81C784",
-      "temperature": 0.1,
-      "permission": {
-        "edit": "deny",
-        "bash": "deny"
-      }
-    },
-    "build": {
-      "mode": "all",
-      "model": "deepseek/deepseek-v4-pro",
-      "description": "默认开发 Agent，用于复杂代码编写、架构设计、重构等需要深度推理的任务",
-      "color": "#4FC3F7",
-      "temperature": 0.5,
-      "steps": 20,
-      "permission": {
-        "edit": "allow",
-        "bash": "allow"
-      }
-    },
-    "code": {
-      "mode": "all",
-      "model": "deepseek/deepseek-v4-flash",
-      "description": "编码专用 Agent，低温度高确定性，适合代码生成与修改",
-      "color": "#FFB74D",
-      "temperature": 0.2,
-      "top_p": 0.9,
-      "permission": {
-        "edit": "allow",
-        "bash": "allow"
-      }
-    },
-    "create": {
-      "mode": "all",
-      "model": "deepseek/deepseek-v4-flash",
-      "description": "创意生成 Agent — 头脑风暴、内容创作、概念设计，较高温度 + top_p 约束保持可控",
-      "color": "#E57373",
-      "temperature": 0.8,
-      "top_p": 0.95,
-      "permission": {
-        "edit": "allow",
-        "bash": "allow"
-      }
-    }
+    "general": { "disable": true }
   }
 }

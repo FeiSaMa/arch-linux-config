@@ -3,5 +3,6 @@
   "theme": "catppuccin-macchiato",
   "scroll_acceleration": {
     "enabled": true
-  }
+  },
+  "mouse": true
 }
