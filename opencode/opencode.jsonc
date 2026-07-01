@@ -10,13 +10,16 @@
   // 默认使用 V4-Flash（平衡速度与能力）
   "model": "deepseek/deepseek-v4-flash",
 
-  // 简单任务（标题生成、摘要等）使用 chat 模型降低成本
+  // 简单任务使用 v4-flash 非思考模式（与主模型同价，但免除 thinking 开销）
   "small_model": "deepseek/deepseek-v4-flash",
 
   // 默认使用 macro agent（意图精炼 + 分发总管）
   "default_agent": "macro",
   "shell": "/bin/zsh",
   "share": "disabled",
+  "autoupdate": "notify",
+  "formatter": false,
+  "disabled_providers": ["openai", "anthropic", "google"],
 
   "provider": {
     "deepseek": {
@@ -108,6 +111,14 @@
     "prune": true,
     "reserved": 24000,
     "tail_turns": 20
+  },
+
+  // ============================================================
+  // 工具输出限制：防止超长内容撑爆上下文
+  // ============================================================
+  "tool_output": {
+    "max_lines": 200,
+    "max_bytes": 8192
   },
 
   // ============================================================
