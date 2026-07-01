@@ -19,3 +19,6 @@ window-padding-y=10
 cursor-style = block
 #光标闪烁
 cursor-style-blink = true
+
+#关闭退出时有子进程运行的弹窗提示
+confirm-close-surface = false

@@ -41,6 +41,7 @@ window-padding-x = 10
 window-padding-y = 10
 cursor-style = block
 cursor-style-blink = true
+confirm-close-surface = false
 ```
 
 ### ~/.config/nvim/
