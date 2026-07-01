@@ -83,7 +83,8 @@
   "instructions": [
     "## 系统提权规则\n\n涉及系统级操作（修改 `/etc/`、重启服务、安装软件包等）时，必须正确选择提权方式：\n\n- **当前机器**（pam_faillock 已配置，sudo 失败 3 次锁定 10 分钟）：**必须使用 `pkexec`**\n- **新机器**（pam_faillock 未配置）：使用 `sudo`\n\n**检测方式**：`pkexec --version` 成功 → 用 `pkexec`；否则用 `sudo`。\n\n```bash\n# 示例：复制文件到 /etc/\npkexec cp file /etc/somewhere      # 当前机器\nsudo cp file /etc/somewhere         # 新机器\n```",
     "## 步骤日志记录规则\n\n你负责记录每步操作日志。在返回消息的**最末尾**附加以下代码块：\n\n```markdown\n## 执行日志\n\n### Step 1: [步骤简述]\n- **推理**: [思考过程]\n- **工具**: `tool_name` [关键参数]\n- **返回**: [关键内容摘要]\n- **结论**: [观察与判断]\n```\n\n**规则**：\n1. 每调用一次工具 = 一个 Step\n2. 禁止省略任何步骤\n3. 工具返回摘要控制在 3-5 行内，勿原文复制\n4. 日志附着在最终消息末尾，不单独发送\n5. 最后附加性能摘要小节",
-    "## 写入前备份规则\n\n子 Agent 在执行任何文件写入/编辑操作前，**必须先备份原文件**到 `~/.cache/opencode-backup/` 目录（如目录不存在则创建）。备份命名格式：`{original_path_underscored}.bak.{timestamp}`。\n\n```bash\n# 示例：编辑 /home/user/project/src/main.py 前\nmkdir -p ~/.cache/opencode-backup\ncp /home/user/project/src/main.py ~/.cache/opencode-backup/main.py.bak.$(date +%s)\n```\n\n此规则适用于所有拥有 `edit: allow` 权限的 Agent（build, code, create）。若写入失败或结果不符合预期，可从备份中恢复。"
+    "## 写入前备份规则\n\n子 Agent 在执行任何文件写入/编辑操作前，**必须先备份原文件**到 `~/.cache/opencode-backup/` 目录（如目录不存在则创建）。备份命名格式：`{original_path_underscored}.bak.{timestamp}`。\n\n```bash\n# 示例：编辑 /home/user/project/src/main.py 前\nmkdir -p ~/.cache/opencode-backup\ncp /home/user/project/src/main.py ~/.cache/opencode-backup/main.py.bak.$(date +%s)\n```\n\n此规则适用于所有拥有 `edit: allow` 权限的 Agent（build, code, create）。若写入失败或结果不符合预期，可从备份中恢复。",
+    "## 配置管理规则\n\n所有配置更改遵循以下流程：\n\n1. **参考仓库** — 软件配置更改参考 `refs/arch-linux-config`，硬件调优修改参考 `refs/arch-linux-config/hardware`\n2. **任务完成后统一同步** — 整个任务完成、用户确认结果后，将涉及的所有文件一次性同步到 `refs/arch-linux-config/` 对应路径\n3. **统一推送远程** — refs 同步完成后，执行 `git add`、`git commit`、`git push` 统一推送到 GitHub\n4. 禁止从 refs 提取覆盖当前配置，除非用户明确要求",
   ],
 
   "references": {

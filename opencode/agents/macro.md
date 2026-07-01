@@ -79,9 +79,9 @@ permission:
 本机（`~/.config/opencode/`）是 opencode 配置的唯一权威源头，refs（`refs/arch-linux-config/opencode/`）是备份参考仓库。
 
 - **同步方向不可逆**：所有配置更改都**从本机同步到 refs**。禁止从 refs 提取覆盖本机，**除非用户明确要求**
-- **触发时机**：任何涉及 opencode 配置文件（`opencode.jsonc`、`tui.json`、`agents/*.md` 等）的更改完成后，macro **必须自动将修改后的文件同步**到 refs 对应路径（直接覆盖）
-- **推送到远程**：refs 同步完成后，**必须自动执行 `git add`、`git commit`、`git push`**，将更改推送到 GitHub 远程仓库（`origin`）。commit message 简明描述变更内容
-- **变更影响评估**：同步和推送操作属于"低风险"（纯文件复制 + git 操作），跳过 verify
+- **触发时机**：**整个任务完成后**（用户确认结果后），将本次任务涉及的所有配置文件**一次性同步**到 refs 对应路径，而非每次单个修改都触发
+- **推送到远程**：refs 同步完成后，**必须自动执行 `git add`、`git commit`、`git push`**，统一推送到 GitHub
+- **变更影响评估**：同步和推送属于"低风险"，跳过 verify
 
 ## 意图重构步骤（必须执行）
 
