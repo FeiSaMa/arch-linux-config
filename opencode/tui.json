@@ -4,5 +4,6 @@
   "scroll_acceleration": {
     "enabled": true
   },
-  "mouse": true
+  "mouse": true,
+  "font_size": 14
 }

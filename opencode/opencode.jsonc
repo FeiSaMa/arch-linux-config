@@ -14,6 +14,8 @@
 
   // 默认使用 macro agent（意图精炼 + 分发总管）
   "default_agent": "macro",
+  "shell": "/bin/zsh",
+  "share": "disabled",
 
   "provider": {
     "deepseek": {
@@ -24,14 +26,14 @@
       "models": {
         "deepseek-v4-flash": {
           "cost": {
-            "input": 1,
-            "output": 2
+            "input": 0.14,
+            "output": 0.28
           }
         },
         "deepseek-v4-pro": {
           "cost": {
-            "input": 4,
-            "output": 16
+            "input": 0.435,
+            "output": 0.87
           },
           // 开启 thinking 模式，利用 reasoning_effort: max 提升深度推理质量
           "options": {
@@ -42,9 +44,10 @@
           }
         },
         "deepseek-chat": {
+          // ⚠️ 将于 2026/07/24 弃用，当前映射到 deepseek-v4-flash 非思考模式
           "cost": {
-            "input": 0.5,
-            "output": 2
+            "input": 0.14,
+            "output": 0.28
           }
         }
       }
