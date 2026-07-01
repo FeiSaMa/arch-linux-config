@@ -9,8 +9,8 @@
   // 默认使用 V4-Flash（平衡速度与能力）
   "model": "deepseek/deepseek-v4-flash",
 
-  // 默认使用 code agent（省钱优先）
-  "default_agent": "code",
+  // 默认使用 macro agent（意图精炼 + 分发总管）
+  "default_agent": "macro",
 
   "provider": {
     "deepseek": {
@@ -56,10 +56,10 @@
   },
 
   // ============================================================
-  // Agent 体系：4 个专用 Agent 覆盖不同复杂度场景
+  // Agent 体系：5 个专用 Agent 覆盖不同复杂度场景
   // ============================================================
   "agent": {
-    // ---- Tab 顺序: plan → build → code → create ----
+    // ---- Tab 顺序: macro → plan → build → code → create ----
     "plan": {
       "mode": "all",
       "model": "deepseek/deepseek-v4-flash",
