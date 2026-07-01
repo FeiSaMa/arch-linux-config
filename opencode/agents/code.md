@@ -9,27 +9,7 @@ color: "#FFB74D"
 permission:
   edit: allow
   bash:
-    "npx *": allow
-    "npm *": allow
-    "pnpm *": allow
-    "yarn *": allow
-    "cargo *": allow
-    "python *": allow
-    "pip *": allow
-    "go *": allow
-    "git *": allow
-    "rg *": allow
-    "ls *": allow
-    "cat *": allow
-    "head *": allow
-    "wc *": allow
-    "make *": allow
-    "just *": allow
-    "mkdir *": allow
-    "cp *": allow
-    "mv *": allow
-    "rm *": allow
-    "*": deny
+    "*": allow
 ---
 
 # Code Agent — 日常编码
@@ -51,13 +31,3 @@ permission:
 4. 配置文件更新
 
 
----
-
-### 性能统计
-在日志块末尾附加：
-```markdown
-#### 性能摘要
-- **总步数**: N
-- **操作分布**: 读取 X 次 / 写入 Y 次 / 搜索 Z 次 / bash W 次
-- **主观耗时**: 快 / 中 / 慢
-```

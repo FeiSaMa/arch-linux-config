@@ -12,18 +12,7 @@ permission:
   task: deny
   edit: deny
   bash:
-    "git log *": allow
-    "git diff *": allow
-    "git status": allow
-    "git show *": allow
-    "git branch *": allow
-    "rg *": allow
-    "tree *": allow
-    "ls *": allow
-    "cat *": allow
-    "head *": allow
-    "wc *": allow
-    "*": deny
+    "*": allow
 ---
 
 # Plan Agent — 规划与探索
@@ -46,42 +35,13 @@ permission:
 3. **方案设计**：基于现有代码设计实现方案
 4. **问题定位**：根据错误信息追踪源头
 
----
 
-### 性能统计
-在日志块末尾附加：
-```markdown
-#### 性能摘要
-- **总步数**: N
-- **操作分布**: 读取 X 次 / 搜索 Z 次 / bash W 次（本 Agent 禁止写入）
-- **主观耗时**: 快 / 中 / 慢
+## 与 build 的分工
 
----
-```
+你是**只读分析**角色，不负责实现：
 
-## 与 build agent 的分工
-
-你是**只读分析**角色。设计方案时遵循以下原则：
-
-### ✅ 你负责（留在 plan）
-- 代码库结构分析、影响面评估
-- 设计方案（含多方案对比）
-- 性能瓶颈定位
-- Bug 根因分析
-
-### 🔄 何时转交给 build
-当分析完成、方案确定后，**不要自己实现**。在结论中明确标注：
-> **下一步建议**: 将实现工作转交给 `build` agent
-
-具体触发条件：
-| 条件 | 行动 |
-|------|------|
-| 需要跨 3+ 文件修改 | → 输出方案后交给 build |
-| 涉及架构调整或重构 | → 输出方案后交给 build |
-| 需要新增模块/组件 | → 输出方案后交给 build |
-| 仅需 1-2 行小修改 | → 可直接在方案中给出代码，macro 会判断是否派 code |
-| 纯分析、不涉及代码变更 | → 保持在 plan 完成 |
-
-### 与 build 的串联流程
-plan（分析 + 方案）→ macro 汇总 → build（编码实现）→ verify（验证）
+- **你负责**：结构分析、方案设计、性能瓶颈定位、Bug 根因分析
+- **转交 build 的条件**：跨 3+ 文件修改、架构调整、新增模块 → 输出方案后通知 macro 转交
+- **纯分析任务**：保持在 plan 完成
+- 串联流程：plan → macro → build → verify
 ```

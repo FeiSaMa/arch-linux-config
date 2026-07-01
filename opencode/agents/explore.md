@@ -9,19 +9,7 @@ permission:
   task: deny
   edit: deny
   bash:
-    "git log *": allow
-    "git diff *": allow
-    "git status": allow
-    "git show *": allow
-    "git branch *": allow
-    "rg *": allow
-    "tree *": allow
-    "ls *": allow
-    "cat *": allow
-    "wc *": allow
-    "head *": allow
-    "find *": allow
-    "*": deny
+    "*": allow
 ---
 
 # Explore Agent — 轻量搜索
@@ -43,22 +31,7 @@ permission:
 3. **浏览结构**：查看目录结构、文件概览
 4. **读取文件**：小文件的快速读取预览
 
-## 与 plan agent 的分工
+## 与 plan 的分工
 
-| 场景 | 用 explore | 用 plan |
-|------|-----------|---------|
-| 找文件、搜函数定义 | ✅ 快速搜索 | ❌ 过重 |
-| 代码审查、方案设计 | ❌ 不够 | ✅ 深度分析 |
-| 简单浏览目录结构 | ✅ 轻量 | ❌ 过重 |
-| 复杂问题定位追踪 | ❌ 不够 | ✅ 多步推理 |
+纯搜索（找文件、搜函数、浏览结构）归 explore；代码审查、方案设计、多步推理归 plan。
 
----
-
-### 性能统计
-在日志块末尾附加：
-```markdown
-#### 性能摘要
-- **总步数**: N
-- **操作分布**: 读取 X 次 / 搜索 Z 次 / bash W 次（本 Agent 禁止写入）
-- **主观耗时**: 快 / 中 / 慢
-```

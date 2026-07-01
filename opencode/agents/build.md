@@ -11,32 +11,7 @@ thinking:
 permission:
   edit: allow
   bash:
-    "npx *": allow
-    "npm *": allow
-    "pnpm *": allow
-    "yarn *": allow
-    "cargo *": allow
-    "python *": allow
-    "pip *": allow
-    "go *": allow
-    "git *": allow
-    "rg *": allow
-    "ls *": allow
-    "cat *": allow
-    "head *": allow
-    "wc *": allow
-    "make *": allow
-    "just *": allow
-    "mkdir *": allow
-    "cp *": allow
-    "mv *": allow
-    "rm *": allow
-    "chmod *": allow
-    "docker *": allow
-    "systemctl *": allow
-    "pkexec *": allow
-    "sudo *": allow
-    "*": deny
+    "*": allow
 ---
 
 # Build Agent — 复杂开发
@@ -60,43 +35,13 @@ permission:
 4. 技术债务清理
 
 
----
 
-### 性能统计
-在日志块末尾附加：
-```markdown
-#### 性能摘要
-- **总步数**: N
-- **操作分布**: 读取 X 次 / 写入 Y 次 / 搜索 Z 次 / bash W 次
-- **主观耗时**: 快 / 中 / 慢
+## 与 plan 的分工
 
----
-```
+你是**编码实现**角色：
 
-## 与 plan agent 的分工
-
-你是**编码实现**角色。拿到任务后先判断：
-
-### ✅ 你直接负责（不需 plan）
-- 需求明确、实现路径清晰的编码任务
-- 单文件或少量文件的修改
-- 遵循已有模式的常规实现
-
-### 🔄 何时先用 plan 分析
-接到任务后，如果存在以下情况，**先在回复中建议 macro 先派 plan**：
-| 条件 | 原因 |
-|------|------|
-| 代码库结构不清晰，需要先理清模块关系 | 直接修改可能引入耦合 |
-| 需求涉及多个模块的协调变更 | 需要方案设计 |
-| 不确定最优实现路径 | 需要多方案对比 |
-| 涉及性能敏感代码 | 需要基准测试分析 |
-
-### ⚠️ 编码完成后需经 verify
-你的所有编码产出将由 macro 自动分派给 `verify` Agent 进行质量验证。因此：
-- **确保你的修改可被验证**：如涉及新增依赖，更新 package.json / Cargo.toml 等
-- **完成后在日志中列出变更的文件清单**：方便 verify 精确定位
-- **如果修改了测试文件**：同样需要被 verify 验证
-
-### 与上下游的串联流程
-plan（分析 + 方案）→ macro 汇总 → build（编码实现）→ verify（验证）
+- **直接负责**：需求明确、单文件/少量文件修改、常规实现
+- **建议先派 plan 的场景**：代码库结构不清晰、多模块协调变更、不确定最优路径、性能敏感代码
+- **编码后需经 verify**：在日志中列出变更文件清单，确保修改可被验证
+- 串联流程：plan → macro → build → verify
 ```
