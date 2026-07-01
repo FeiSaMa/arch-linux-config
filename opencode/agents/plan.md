@@ -8,6 +8,7 @@ thinking:
   type: enabled
   reasoning_effort: max
 permission:
+  task: deny
   edit: deny
   bash:
     "git *": allow

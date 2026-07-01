@@ -1,10 +1,11 @@
 ---
 description: 轻量搜索 Agent — 快速查找文件、搜索代码、浏览项目结构，极低成本
 mode: subagent
-model: deepseek/deepseek-chat
+model: deepseek/deepseek-v4-flash
 temperature: 0.1
 color: "#FFD54F"
 permission:
+  task: deny
   edit: deny
   bash:
     "git *": allow

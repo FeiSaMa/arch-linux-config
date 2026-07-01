@@ -10,7 +10,7 @@
   "model": "deepseek/deepseek-v4-flash",
 
   // 简单任务（标题生成、摘要等）使用 chat 模型降低成本
-  "small_model": "deepseek/deepseek-chat",
+  "small_model": "deepseek/deepseek-v4-flash",
 
   // 默认使用 macro agent（意图精炼 + 分发总管）
   "default_agent": "macro",

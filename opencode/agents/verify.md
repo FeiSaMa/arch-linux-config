@@ -6,6 +6,7 @@ temperature: 0.2
 top_p: 0.9
 color: "#A5D6A7"
 permission:
+  task: deny
   edit: deny
   bash:
     "npx *": allow
