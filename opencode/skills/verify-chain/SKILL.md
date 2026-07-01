@@ -12,7 +12,7 @@ description: Use after build or code agent completes a coding task, to determine
 | 变更类型 | 示例 | 是否触发 verify |
 |---------|------|---------------|
 | 🔴 **高风险** | 函数逻辑变更、API 修改、跨模块改动、依赖更新 | ✅ **必须**触发 |
-| 🟡 **中风险** | 单文件新增、配置文件值变更、CSS/样式修改 | ✅ **建议**触发 |
+| 🟡 **中风险** | 单文件新增、配置文件值变更、CSS/样式修改 | ✅ **必须**触发（除非用户明确要求跳过） |
 | 🟢 **低风险** | 纯文档/注释变更、README 更新、变量重命名 | ❌ **跳过** |
 | ⚪ **无代码变更** | create/explore 执行的任务 | ❌ **跳过** |
 
@@ -28,7 +28,7 @@ description: Use after build or code agent completes a coding task, to determine
 ## Verify 不触发条件
 
 - 变更影响评估结果为"低风险"或"无代码变更"
-- 用户明确要求不验证
+- **中风险但用户明确要求跳过验证**
 - create 或 explore 执行的任务（不产生代码变更）
 
 ## Verify prompt 构建
