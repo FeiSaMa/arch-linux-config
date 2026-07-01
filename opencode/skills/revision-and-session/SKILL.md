@@ -37,10 +37,10 @@ description: Use when handling incremental revisions, user feedback on sub-agent
 | 任务类型 | Session 复用上限 | 轮换策略 |
 |---------|-----------------|---------|
 | 🔍 **explore** | **不缓存**（一次性用完即弃） | 每次新建 session |
-| 📝 **code** | 同一 session ≤ **1 次**复用（共 2 轮） | 超过后开新 session，通过状态摘要迁移关键上下文 |
+| 📝 **code** | 同一 session ≤ **3 次**复用（共 4 轮） | 超过后开新 session，通过状态摘要迁移关键上下文 |
 | 🏗️ **plan→build→verify 流水线** | 整条流水线共用同一 session | **p/b/v 各自分界点做上下文截断**；流水线完成后自动归档，不跨需求复用 |
 | 🔧 **修订通道** | 同一 session ≤ **3 次**修正 | 超过后建议用户重新提需求 |
-| 🎨 **create** | 同一 session ≤ **1 次**复用（共 2 轮） | 超过后开新 session |
+| 🎨 **innovate** | 同一 session ≤ **3 次**复用（共 4 轮） | 超过后开新 session |
 | ✅ **verify** | **不缓存** | 每次新建 session，结果通过摘要传递 |
 
 ### 状态摘要格式

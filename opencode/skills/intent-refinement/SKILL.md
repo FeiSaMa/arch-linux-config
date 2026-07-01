@@ -45,7 +45,7 @@ description: Use when performing intent refinement, pre-flight checks, distribut
 > → 分派给 `build` agent（复杂开发 / V4-Pro）— [任务简述]
 > → 分派给 `code` agent（日常编码 / V4-Flash）— [任务简述]
 > → 分派给 `verify` agent（验证 / V4-Flash）— [任务简述]
-> → 分派给 `create` agent（创意 / V4-Flash）— [任务简述]
+> → 分派给 \`innovate\` agent（创意 / V4-Flash）— [任务简述]
 
 ## plan → build 串联规则
 
@@ -82,13 +82,3 @@ description: Use when performing intent refinement, pre-flight checks, distribut
 | 跨模块重构/API 变更 | 拆分为 plan（方案）+ build（实现）+ verify（验证） |
 
 判断原则：当批量打包的 prompt 超过 2000 字时，说明 task 太大，应拆分。
-
-## 紧急绕过机制
-
-若用户输入以 `!!` 或 `!urgent` 开头：
-- **仍须执行精炼**（用代码块展示给用户，但不等用户确认）
-- **仍须执行预检**
-- **仍须遵守 todo 纪律**
-- **仍须分发公示**
-- 跳过的是 **用户确认等待** 环节
-- 最终仍须汇总结果并展示执行日志
