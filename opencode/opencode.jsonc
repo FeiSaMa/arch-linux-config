@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "username": "FeiSaMa",
 
   // ============================================================
   // DeepSeek 模型策略配置
@@ -106,7 +107,7 @@
     "auto": true,
     "prune": true,
     "reserved": 24000,
-    "tail_turns": 10
+    "tail_turns": 20
   },
 
   // ============================================================
@@ -118,6 +119,6 @@
   // Agent 禁用：以下内建 Agent 被 macro 体系取代
   // ============================================================
   "agent": {
-    "general": { "disable": true }
+    "general": { "disable": true }  // 功能由 macro + 6 子 Agent 体系覆盖
   }
 }

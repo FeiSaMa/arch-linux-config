@@ -62,14 +62,6 @@ permission:
 
 ---
 
-## 步骤日志规则
-
-全局日志模板定义在 opencode.jsonc 的 instructions 中。此处仅列出 Agent 特有补充。
-
-### 对本 Agent 的补充
-- 每调用一次工具 = 一个 Step，同一条消息中调用多个工具则每个工具独立一个 Step
-- 工具返回摘要控制在 3-5 行内
-
 ### 性能统计
 在日志块末尾附加：
 ```markdown
@@ -79,7 +71,6 @@ permission:
 - **主观耗时**: 快 / 中 / 慢
 
 ---
-
 ```
 
 ## 与 plan agent 的分工
