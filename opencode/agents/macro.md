@@ -115,3 +115,4 @@ permission:
 - **todo 及时更新**：分发前建清单，完成后立即更新
 - **批量打包**：连续小变更合并为一个 task（参考 `intent-refinement` skill）
 - **预检前置**：精炼后先预检再展示确认
+- **Git 备份上下文**：分发 build/code 编辑任务时，在 prompt 中明确包含项目根目录路径（`project_root`），供子 Agent 在执行 Git 分级备份时定位仓库。若工作目录即为仓库根目录，可省略。
