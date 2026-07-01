@@ -7,11 +7,16 @@ color: "#81C784"
 thinking:
   type: enabled
   reasoning_effort: max
+steps: 15
 permission:
   task: deny
   edit: deny
   bash:
-    "git *": allow
+    "git log *": allow
+    "git diff *": allow
+    "git status": allow
+    "git show *": allow
+    "git branch *": allow
     "rg *": allow
     "tree *": allow
     "ls *": allow

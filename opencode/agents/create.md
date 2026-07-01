@@ -9,7 +9,11 @@ color: "#E57373"
 permission:
   edit: deny
   bash:
-    "git *": allow
+    "git log *": allow
+    "git diff *": allow
+    "git status": allow
+    "git show *": allow
+    "git branch *": allow
     "rg *": allow
     "ls *": allow
     "cat *": allow

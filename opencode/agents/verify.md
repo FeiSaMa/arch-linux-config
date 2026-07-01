@@ -4,6 +4,7 @@ mode: subagent
 model: deepseek/deepseek-v4-flash
 temperature: 0.2
 top_p: 0.9
+steps: 15
 color: "#A5D6A7"
 permission:
   task: deny
@@ -29,7 +30,11 @@ permission:
     "dotnet *": allow
     "gradle *": allow
     "mvn *": allow
-    "git *": allow
+    "git log *": allow
+    "git diff *": allow
+    "git status": allow
+    "git show *": allow
+    "git branch *": allow
     "ls *": allow
     "cat *": allow
     "head *": allow
